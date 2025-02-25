@@ -6,17 +6,36 @@ class TimeTableScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Row(
+    return SingleChildScrollView(
+      child: Row(
         children: [
           Ruler(
             width: 60,
-            hourHeight: 60,
+            hourHeight: 150,
             lineColor: Colors.grey.shade400,
             textColor: Colors.grey.shade700,
           ),
-          Expanded(child: Container()),
+          Expanded(
+            child: SizedBox(
+              height: 24 * 150,
+              child: GridView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 7,
+                  mainAxisExtent: 150,
+                  childAspectRatio: 1,
+                ),
+                itemCount: 24 * 7,
+                itemBuilder:
+                    (context, index) => Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        color: Colors.white.withValues(alpha: 0.7),
+                      ),
+                    ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -41,14 +60,12 @@ class Ruler extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: width,
-      child: SingleChildScrollView(
-        child: CustomPaint(
-          size: Size(100, 24 * hourHeight +20),
-          painter: RulerPaint(
-            hourHeight: hourHeight,
-            lineColor: lineColor,
-            textColor: textColor,
-          ),
+      child: CustomPaint(
+        size: Size(100, 24 * hourHeight),
+        painter: RulerPaint(
+          hourHeight: hourHeight,
+          lineColor: lineColor,
+          textColor: textColor,
         ),
       ),
     );
@@ -76,12 +93,8 @@ class RulerPaint extends CustomPainter {
     final textPainter = TextPainter(textDirection: TextDirection.ltr);
 
     for (int hour = 0; hour < 24; hour++) {
-      final y = hour * hourHeight +20;
-      canvas.drawLine(
-        Offset(size.width - 15, y),
-        Offset(size.width, y),
-        paint,
-      );
+      final y = hour * hourHeight;
+      canvas.drawLine(Offset(size.width - 15, y), Offset(size.width, y), paint);
 
       final quarterHeight = hourHeight / 4;
       for (int i = 1; i < 4; i++) {
@@ -105,10 +118,12 @@ class RulerPaint extends CustomPainter {
         ..text = timeText
         ..layout();
 
-      textPainter.paint(
-        canvas,
-        Offset(5, y - textPainter.height/2),
-      );
+      if(hour == 0){
+        textPainter.paint(canvas, Offset(5, y));
+      }else{
+        textPainter.paint(canvas, Offset(5, y - textPainter.height / 2));
+      }
+
     }
   }
 
