@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:h_time/calendar.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:h_time/time_table.dart';
 import 'package:h_time/constant.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -12,41 +14,174 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Row(children: [_buildSlidebar(), _buildContent()]));
-  }
-
-  Column _buildContent() {
-    return Column(
-        children: [
-          _buildHeader(),
-          Container()
-          //Calendar(),
-        ],
-    );
-  }
-
-  Container _buildHeader() {
-    return Container(
-      height: 100,
-      decoration: BoxDecoration(
-        color: primaryColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
-            spreadRadius: 7,
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
-        ],
+    return SafeArea(
+      child: Scaffold(
+        body: Row(
+          children: [_buildSlideBar(),Expanded(child: _buildContent()), ],
+        ),
       ),
-      child: Column(children: [Row(children: [
-
-            ],
-          )]),
     );
   }
 
-  Widget _buildSlidebar() {
+  Widget _buildContent() {
+    return Column(children: [_buildHeader(), Expanded(child: TimeTableScreen())]);
+  }
+
+  
+Container _buildHeader() {
+    String getFormattedDate() {
+    final now = DateTime.now();
+    final days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+    final months = [
+      'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+      'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
+    ];
+    return '${days[now.weekday - 1]} ${now.day} ${months[now.month - 1]} ${now.year}';
+    }
+  return Container(
+    height: 130,
+    decoration: BoxDecoration(
+      color: primaryColor,
+      boxShadow: [
+        BoxShadow(
+          color: const Color.fromRGBO(0, 0, 0, 0.1),
+          spreadRadius: 0,
+          blurRadius: 4,
+          offset: const Offset(0, 3),
+        ),
+      ],
+    ),
+    child: Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.all(08),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  backgroundColor: Colors.green[100],
+                  textStyle: GoogleFonts.roboto(
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.add, color: Colors.green),
+                    Text("Nouvelle une tâche"),
+                  ],
+                )
+              ),
+              Spacer(),
+              Container(
+                height: 25,
+                width: 150,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.grey,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          bottomLeft: Radius.circular(10),
+                        ),
+                        color: Colors.red,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text("Jour"), //TODO: Add Text Style
+
+                    ),),
+                    Expanded(child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(10),
+                          bottomRight: Radius.circular(10),
+                        ),
+                        color: Colors.orange,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text("Semaine"), //TODO: Add Text Style
+                    ),),
+                  ],
+                ),
+              ),
+              Spacer(),
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: (){},
+                    icon: Icon(FontAwesomeIcons.download, size: 15,),
+                  ),
+                  IconButton(
+                    onPressed: (){},
+                    icon: Icon(FontAwesomeIcons.shareFromSquare, size: 15,),
+                  ),
+                  IconButton(
+                    onPressed: (){},
+                    icon: Icon(Icons.settings_outlined, size: 15,),
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+        Spacer(),
+        Row(
+          children: [
+          Text(
+            getFormattedDate(),
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+            ),
+          )
+          ],
+        ),
+        Spacer(),
+        Row(
+          children: [
+            SizedBox(width: 60), // Même largeur que le Ruler
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: List.generate(7, (index) {
+                  final days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+                  return Expanded(
+                    child: Container(
+                      //width: 50,
+                      color: Colors.green.withValues(alpha: 0.1),
+                      padding: EdgeInsets.only(bottom: 8),
+                      alignment: Alignment.bottomCenter,
+                      child: Text(
+                        days[index],
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            )
+          ],
+        ),
+      ],
+    ),
+  );
+}
+  Widget _buildSlideBar() {
     return Container(
       width: 150,
       decoration: BoxDecoration(
