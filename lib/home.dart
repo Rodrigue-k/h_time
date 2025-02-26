@@ -54,7 +54,7 @@ Container _buildHeader() {
     child: Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -84,34 +84,45 @@ Container _buildHeader() {
                 height: 25,
                 width: 150,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.grey,
+                  borderRadius: BorderRadius.circular(05),
+                  color: Colors.grey[400],
                 ),
                 child: Row(
                   children: [
                     Expanded(child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          bottomLeft: Radius.circular(10),
+                        borderRadius: BorderRadius.circular(10
+                          //topLeft: Radius.circular(10),
+                          //bottomLeft: Radius.circular(10),
                         ),
-                        color: Colors.red,
+                        //color: Colors.red,
                       ),
                       alignment: Alignment.center,
-                      child: Text("Jour"), //TODO: Add Text Style
+                      child: Text("Jour",
+                      style: GoogleFonts.roboto(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12
+                      ),), //TODO: Add Text Style
 
                     ),),
                     Expanded(child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(10),
-                          bottomRight: Radius.circular(10),
+                        borderRadius: BorderRadius.circular(10
+                          //topRight: Radius.circular(10),
+                          //bottomRight: Radius.circular(10),
                         ),
-                        color: Colors.orange,
+                        color: primaryColor,
                       ),
                       alignment: Alignment.center,
-                      child: Text("Semaine"), //TODO: Add Text Style
-                    ),),
+                      child: Text("Semaine",
+                      style: GoogleFonts.roboto(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12
+                      ),), //TODO: Add Text Style
+                    ),
+                    ),
                   ],
                 ),
               ),
@@ -190,21 +201,21 @@ Container _buildHeader() {
       ),
       child: Column(
         children: [
-          _buildProgram(),
+          //_buildProgram(),
           SizedBox(height: 10),
           _buildNavItem(
-            Icons.calendar_view_week_outlined,
+            FontAwesomeIcons.calendarWeek,
             Colors.black,
             'calendrier',
           ),
-          _buildNavItem(Icons.task_alt_outlined, Colors.black, 'Taches'),
-          _buildNavItem(Icons.note_outlined, Colors.black, 'Notes'),
+          _buildNavItem(FontAwesomeIcons.listCheck, Colors.black, 'Taches'),
+          //_buildNavItem(FontAwesomeIcons., Colors.black, 'Notes'),
         ],
       ),
     );
   }
 
-  InkWell _buildProgram() {
+  /*InkWell _buildProgram() {
     return InkWell(
       onTap: () {},
       child: Container(
@@ -228,7 +239,7 @@ Container _buildHeader() {
         ),
       ),
     );
-  }
+  }*/
 
   InkWell _buildNavItem(IconData? icon, Color color, String name) {
     return InkWell(
@@ -245,7 +256,7 @@ Container _buildHeader() {
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 10,
           children: [
-            Icon(icon, color: color, size: 20),
+            Icon(icon, color: color, size: 15),
             Text(name, style: TextStyle(color: color, fontSize: 12)),
           ],
         ),
