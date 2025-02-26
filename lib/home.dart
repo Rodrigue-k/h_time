@@ -84,6 +84,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         context: context,
                         builder:
                             (context) => AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                               title: Text(
                                 "Nouvelle tâche",
                                 style: GoogleFonts.roboto(
@@ -92,39 +95,52 @@ class _MyHomePageState extends State<MyHomePage> {
                                   fontSize: 15,
                                 ),
                               ),
-                              content: Column(
-                                children: [
-                                  Container(
-                                    color: Colors.white,
-                                    height: 35, // Ajuste selon tes besoins
-                                    child: TextField(
-                                      decoration: InputDecoration(
-                                        labelText: 'Matière',
-                  
-                                        enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
+                              content: SizedBox(
+                                width: 300,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(5),
+                                        color: Colors.white,
+                                      ),
+                                      height: 32,
+                                      child: TextField(
+                                        decoration: InputDecoration(
+                                          labelText: 'Matière',
+                                          floatingLabelBehavior:
+                                              FloatingLabelBehavior.never,
+                                          enabledBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.grey,
+                                              width: 0.5,
+                                            ),
+                                          ),
+                                          focusedBorder: UnderlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              5,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: Colors.blue,
+                                              width: 1.0,
+                                            ),
+                                          ),
+                                          labelStyle: GoogleFonts.roboto(
                                             color: Colors.grey,
-                                            width: 0.5,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
                                           ),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.blue,
-                                            width: 1.0,
+                                          
+                                          contentPadding: EdgeInsets.symmetric(
+                                            vertical: 14,
+                                            horizontal: 12.0,
                                           ),
-                                        ),
-                                        labelStyle: TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 16,
-                                        ),
-                                        contentPadding: EdgeInsets.symmetric(
-                                          vertical: 10.0,
-                                          horizontal: 12.0,
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                               actions: [
                                 TextButton(
