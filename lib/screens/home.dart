@@ -1,8 +1,10 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:h_time/time_table.dart';
-import 'package:h_time/constant.dart';
+import 'package:h_time/screens/time_table.dart';
+import 'package:h_time/const/constant.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -12,6 +14,22 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final TextEditingController _TitleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  String _title = '';
+  String _description = '';
+
+  bool weekView = true; //TODO :provided
+
+  final _formKey = GlobalKey<FormState>();
+
+  _submit() {
+    if (_formKey.currentState!.validate()) {
+      print('Submit');
+      Navigator.pop(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -97,49 +115,43 @@ class _MyHomePageState extends State<MyHomePage> {
                               ),
                               content: SizedBox(
                                 width: 300,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(5),
-                                        color: Colors.white,
+                                child: Form(
+                                  key: _formKey,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    spacing: 10,
+                                    children: [
+                                      _buildTextField(
+                                        'Titre',
+                                        1,
+                                        controller: _TitleController,
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Veuillez entrer une matière';
+                                          }
+                                          return null;
+                                        },
+                                        onChanged:
+                                            (value) =>
+                                                setState(() => _title = value),
                                       ),
-                                      height: 32,
-                                      child: TextField(
-                                        decoration: InputDecoration(
-                                          labelText: 'Matière',
-                                          floatingLabelBehavior:
-                                              FloatingLabelBehavior.never,
-                                          enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Colors.grey,
-                                              width: 0.5,
+                                      _buildTextField(
+                                        'Description',
+                                        5,
+                                        controller: _descriptionController,
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Veuillez entrer une description';
+                                          }
+                                          return null;
+                                        },
+                                        onChanged:
+                                            (value) => setState(
+                                              () => _description = value,
                                             ),
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              5,
-                                            ),
-                                            borderSide: BorderSide(
-                                              color: Colors.blue,
-                                              width: 1.0,
-                                            ),
-                                          ),
-                                          labelStyle: GoogleFonts.roboto(
-                                            color: Colors.grey,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          
-                                          contentPadding: EdgeInsets.symmetric(
-                                            vertical: 14,
-                                            horizontal: 12.0,
-                                          ),
-                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                               actions: [
@@ -148,16 +160,16 @@ class _MyHomePageState extends State<MyHomePage> {
                                   child: Text("Annuler"),
                                 ),
                                 ElevatedButton(
-                                  onPressed: () => Navigator.pop(context),
+                                  onPressed: () => _submit(),
                                   child: Text("Ajouter"),
                                 ),
                               ],
                             ),
                       ),
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.all(08),
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     backgroundColor: Colors.green[100],
                     textStyle: GoogleFonts.roboto(
@@ -184,45 +196,59 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(
-                              10,
-                              //topLeft: Radius.circular(10),
-                              //bottomLeft: Radius.circular(10),
+                        child: InkWell(
+                          onTap:
+                              () => setState(() {
+                                weekView = !weekView;
+                              }),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(
+                                10,
+                                //topLeft: Radius.circular(10),
+                                //bottomLeft: Radius.circular(10),
+                              ),
+                              color:
+                                  !weekView ? primaryColor : Colors.transparent,
                             ),
-                            //color: Colors.red,
+                            alignment: Alignment.center,
+                            child: Text(
+                              "Jour",
+                              style: GoogleFonts.roboto(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ), //TODO: Add Text Style
                           ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            "Jour",
-                            style: GoogleFonts.roboto(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ), //TODO: Add Text Style
                         ),
                       ),
                       Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(
-                              10,
-                              //topRight: Radius.circular(10),
-                              //bottomRight: Radius.circular(10),
+                        child: InkWell(
+                          onTap:
+                              () => setState(() {
+                                weekView = !weekView;
+                              }),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(
+                                10,
+                                //topRight: Radius.circular(10),
+                                //bottomRight: Radius.circular(10),
+                              ),
+                              color:
+                                  weekView ? primaryColor : Colors.transparent,
                             ),
-                            color: primaryColor,
+                            alignment: Alignment.center,
+                            child: Text(
+                              "Semaine",
+                              style: GoogleFonts.roboto(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ), //TODO: Add Text Style
                           ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            "Semaine",
-                            style: GoogleFonts.roboto(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ), //TODO: Add Text Style
                         ),
                       ),
                     ],
@@ -303,6 +329,59 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  Widget _buildTextField(
+    String labelText,
+    int? maxLines, {
+    TextEditingController? controller,
+    String? Function(String?)? validator,
+    void Function(String)? onChanged,
+  }) {
+    return TextFormField(
+      controller: controller,
+      maxLines: maxLines,
+      onChanged: onChanged,
+      validator: validator,
+      style: GoogleFonts.roboto(
+        color: Colors.black87,
+        fontSize: 15,
+        fontWeight: FontWeight.bold,
+        height: 1.5,
+      ),
+      //textAlignVertical: TextAlignVertical.top,
+      decoration: InputDecoration(
+        alignLabelWithHint: true,
+        labelText: labelText,
+        floatingLabelBehavior: FloatingLabelBehavior.never,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.blue.shade400, width: 1),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.red.shade300),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.red.shade400, width: 2),
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        labelStyle: GoogleFonts.roboto(
+          color: Colors.grey.shade600,
+          fontSize: 14,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 12.0,
+          horizontal: 16.0,
+        ),
+      ),
+    );
+  }
+
   Widget _buildSlideBar() {
     return Container(
       width: 150,
@@ -373,5 +452,12 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _TitleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 }

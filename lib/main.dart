@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:h_time/time_table.dart';
-import 'package:h_time/home.dart';
+import 'package:h_time/screens/time_table.dart';
+import 'package:h_time/screens/home.dart';
 
 void main() {
   runApp(const MyApp());
