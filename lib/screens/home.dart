@@ -1,27 +1,25 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:h_time/provider/week_view_provider.dart';
 import 'package:h_time/screens/time_table.dart';
 import 'package:h_time/const/constant.dart';
 
-
-class MyHomePage extends ConsumerStatefulWidget {
+class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
   @override
-  ConsumerState<MyHomePage> createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends ConsumerState<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _TitleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   String _title = '';
   String _description = '';
 
+  bool weekView = true; //TODO :provided
 
   final _formKey = GlobalKey<FormState>();
 
@@ -50,8 +48,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
   }
 
   Container _buildHeader() {
-    
-    final weekView = ref.watch(weekViewProvider);
     String getFormattedDate() {
       final now = DateTime.now();
       final days = [
@@ -202,7 +198,9 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                       Expanded(
                         child: InkWell(
                           onTap:
-                              () => ref.read(weekViewProvider.notifier).toggleWeekView(),
+                              () => setState(() {
+                                weekView = !weekView;
+                              }),
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(
@@ -228,7 +226,9 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                       Expanded(
                         child: InkWell(
                           onTap:
-                              () => ref.read(weekViewProvider.notifier).toggleWeekView(),
+                              () => setState(() {
+                                weekView = !weekView;
+                              }),
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(
