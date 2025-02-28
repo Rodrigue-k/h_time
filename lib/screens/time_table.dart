@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:h_time/provider/week_view_provider.dart';
 
-class TimeTableScreen extends StatelessWidget {
+class TimeTableScreen extends ConsumerWidget {
   const TimeTableScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SingleChildScrollView(
       child: Row(
         children: [
@@ -21,15 +23,15 @@ class TimeTableScreen extends StatelessWidget {
               child: GridView.builder(
                 physics: NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 7,
+                  crossAxisCount: ref.watch(weekViewProvider)? 7 : 1,
                   mainAxisExtent: 150,
                   childAspectRatio: 1,
                 ),
-                itemCount: 24 * 7,
+                itemCount: ref.watch(weekViewProvider)? 24 * 7 : 24,
                 itemBuilder:
                     (context, index) => Container(
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
+                        border: ref.watch(weekViewProvider)? Border.all(color: Colors.grey.shade300) : null,
                         color: Colors.white.withValues(alpha: 0.7),
                       ),
                     ),

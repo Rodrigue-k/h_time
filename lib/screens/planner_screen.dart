@@ -1,12 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:h_time/models/task.dart';
+import 'package:h_time/providers/task_provider.dart';
+import 'package:h_time/widgets/task_form.dart';
 import 'package:intl/intl.dart';
 
-class PlannerScreen extends StatelessWidget {
+class PlannerScreen extends ConsumerStatefulWidget {
   const PlannerScreen({super.key});
 
   @override
+  ConsumerState<PlannerScreen> createState() => _PlannerScreenState();
+}
+
+class _PlannerScreenState extends ConsumerState<PlannerScreen> {
+  DateTime _selectedDate = DateTime.now();
+
+  void _showAddTaskDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.6,
+          child: const TaskForm(),
+        ),
+      ),
+    );
+  }
+
+  void _showEditTaskDialog(Task task) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.6,
+          child: TaskForm(task: task),
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final tasks = ref.watch(dailyTasksProvider(_selectedDate));
+
     return Scaffold(
       body: Row(
         children: [
@@ -54,30 +91,42 @@ class PlannerScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 24),
                       ElevatedButton.icon(
-                        onPressed: () {},
+                        onPressed: _showAddTaskDialog,
                         icon: const Icon(Icons.add),
-                        label: const Text('Nouvelle leçon'),
+                        label: const Text('Nouvelle tâche'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      OutlinedButton(
-                        onPressed: () {},
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                        child: const Text('Premium'),
-                      ),
                       const Spacer(),
-                      Text(
-                        DateFormat('d MMMM yyyy').format(DateTime.now()),
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.chevron_left),
+                            onPressed: () {
+                              setState(() {
+                                _selectedDate = _selectedDate.subtract(const Duration(days: 1));
+                              });
+                            },
+                          ),
+                          Text(
+                            DateFormat('d MMMM yyyy').format(_selectedDate),
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.chevron_right),
+                            onPressed: () {
+                              setState(() {
+                                _selectedDate = _selectedDate.add(const Duration(days: 1));
+                              });
+                            },
+                          ),
+                        ],
                       ),
                       const SizedBox(width: 16),
                       IconButton(
@@ -93,9 +142,55 @@ class PlannerScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Calendar Grid
+                // Tasks List
                 Expanded(
-                  child: _buildCalendarGrid(),
+                  child: tasks.when(
+                    data: (tasksList) => ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: tasksList.length,
+                      itemBuilder: (context, index) {
+                        final task = tasksList[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          child: ListTile(
+                            leading: Container(
+                              width: 4,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Color(int.parse('0xFF${task.color}')),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                            title: Text(task.title),
+                            subtitle: Text(
+                              '${DateFormat('HH:mm').format(task.startTime)} - ${DateFormat('HH:mm').format(task.endTime)}',
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (task.isRecurring)
+                                  const Icon(Icons.repeat, size: 20),
+                                IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  onPressed: () => _showEditTaskDialog(task),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    ref.read(taskProvider.notifier).deleteTask(task);
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (error, stack) => Center(
+                      child: Text('Erreur: $error'),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -106,145 +201,22 @@ class PlannerScreen extends StatelessWidget {
   }
 
   Widget _buildSidebarItem(String title, IconData icon, bool isSelected) {
-    return ListTile(
-      leading: Icon(icon, color: isSelected ? Colors.blue : Colors.grey),
-      title: Text(
-        title,
-        style: GoogleFonts.inter(
-          color: isSelected ? Colors.blue : Colors.black,
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: isSelected ? Colors.blue.withOpacity(0.1) : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: isSelected ? Colors.blue : Colors.grey),
+        title: Text(
+          title,
+          style: TextStyle(
+            color: isSelected ? Colors.blue : Colors.grey[800],
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
         ),
       ),
-      selected: isSelected,
-      onTap: () {},
     );
   }
-
-  Widget _buildCalendarGrid() {
-    return Container(
-      color: Colors.grey[100],
-      child: Column(
-        children: [
-          // Days header
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
-            ),
-            child: Row(
-              children: [
-                const SizedBox(width: 75), // Time column
-                ...List.generate(
-                  7,
-                  (index) => Expanded(
-                    child: Center(
-                      child: Text(
-                        DateFormat('E, d').format(
-                          DateTime.now().add(Duration(days: index)),
-                        ),
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Time slots
-          Expanded(
-            child: ListView.builder(
-              itemCount: 24,
-              itemBuilder: (context, index) {
-                return Container(
-                  height: 60,
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: Colors.grey[200]!),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 75,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Center(
-                                child: Text(
-                                  '${index.toString().padLeft(2, '0')}:00',
-                                  style: GoogleFonts.inter(
-                                    color: Colors.grey[600],
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 15,
-                              height: 60,
-                              child: CustomPaint(
-                                painter: RuleGraduationPainter(),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      ...List.generate(
-                        7,
-                        (dayIndex) => Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border(
-                                left: BorderSide(color: Colors.grey[200]!),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class RuleGraduationPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.grey[300]!
-      ..strokeWidth = 1;
-
-    // Dessiner les graduations
-    for (int i = 0; i <= 12; i++) {
-      double y = (size.height / 12) * i;
-      double lineLength;
-      
-      if (i == 0 || i == 12) {
-        lineLength = 15.0;
-      } else if (i % 2 == 0) {
-        lineLength = 10.0;
-      } else {
-        lineLength = 5.0;
-      }
-      
-      canvas.drawLine(
-        Offset(size.width - lineLength, y),
-        Offset(size.width, y),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

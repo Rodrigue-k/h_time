@@ -1,5 +1,5 @@
 name: h_time
-description: "A new Flutter project."
+description: "Une application de gestion d'emploi du temps hebdomadaire"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -32,13 +32,23 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^2.6.1
-  intl: ^0.19.0
+  riverpod_annotation: ^2.3.3
+  intl: ^0.20.2
   google_fonts: ^6.1.0
   flutter_svg: ^2.0.10+1
-  ruler_scale_picker: ^0.1.0
   font_awesome_flutter: ^10.8.0
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+  path_provider: ^2.1.2
+  uuid: ^4.3.3
+  flutter_slidable: ^3.0.1
+  table_calendar: ^3.1.0
+  flutter_animate: ^4.5.0
 
 dev_dependencies:
+  riverpod_generator: ^2.3.9
+  build_runner: ^2.4.8
+  isar_generator: ^3.1.0+1
   flutter_test:
     sdk: flutter
 
@@ -90,3 +100,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  # assets:
+  #  - assets/images/
+  #  - assets/icons/
