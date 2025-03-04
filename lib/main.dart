@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:h_time/screens/time_table.dart';
-import 'package:h_time/screens/home.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:h_time/screens/screens.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(ProviderScope(child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {

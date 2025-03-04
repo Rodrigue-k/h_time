@@ -1,31 +1,34 @@
-import 'dart:ffi';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:h_time/screens/time_table.dart';
+import 'package:h_time/providers/providers.dart';
 import 'package:h_time/const/constant.dart';
+import 'package:h_time/widgets/widgets.dart';
 
-class MyHomePage extends StatefulWidget {
+
+class MyHomePage extends ConsumerStatefulWidget {
   const MyHomePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  ConsumerState<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  final TextEditingController _TitleController = TextEditingController();
+class _MyHomePageState extends ConsumerState<MyHomePage> {
+  final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   String _title = '';
   String _description = '';
-
-  bool weekView = true; //TODO :provided
 
   final _formKey = GlobalKey<FormState>();
 
   _submit() {
     if (_formKey.currentState!.validate()) {
-      print('Submit');
+      if (kDebugMode) {
+        print('Submit');
+      }
       Navigator.pop(context);
     }
   }
@@ -43,11 +46,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _buildContent() {
     return Column(
-      children: [_buildHeader(), Expanded(child: TimeTableScreen())],
+      children: [_buildHeader(), Expanded(child: ScheduleView())],
     );
   }
 
   Container _buildHeader() {
+    bool viewMode = ref.watch(scheduleViewModeProvider);
     String getFormattedDate() {
       final now = DateTime.now();
       final days = [
@@ -124,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       _buildTextField(
                                         'Titre',
                                         1,
-                                        controller: _TitleController,
+                                        controller: _titleController,
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
                                             return 'Veuillez entrer une matière';
@@ -198,9 +202,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       Expanded(
                         child: InkWell(
                           onTap:
-                              () => setState(() {
-                                weekView = !weekView;
-                              }),
+                              () =>  ref.read(scheduleViewModeProvider.notifier).state = true,
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(
@@ -209,7 +211,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 //bottomLeft: Radius.circular(10),
                               ),
                               color:
-                                  !weekView ? primaryColor : Colors.transparent,
+                                  viewMode? primaryColor : Colors.transparent,
                             ),
                             alignment: Alignment.center,
                             child: Text(
@@ -226,9 +228,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       Expanded(
                         child: InkWell(
                           onTap:
-                              () => setState(() {
-                                weekView = !weekView;
-                              }),
+                              () => ref.read(scheduleViewModeProvider.notifier).state = false,
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(
@@ -237,7 +237,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 //bottomRight: Radius.circular(10),
                               ),
                               color:
-                                  weekView ? primaryColor : Colors.transparent,
+                                  !viewMode? primaryColor : Colors.transparent,
                             ),
                             alignment: Alignment.center,
                             child: Text(
@@ -456,7 +456,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
-    _TitleController.dispose();
+    _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }

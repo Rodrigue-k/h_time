@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class TimeTableScreen extends StatelessWidget {
-  const TimeTableScreen({super.key});
+class ScheduleView extends StatelessWidget {
+  const ScheduleView({super.key});
 
   @override
   Widget build(BuildContext context) {
