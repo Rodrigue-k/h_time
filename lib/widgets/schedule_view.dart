@@ -19,15 +19,43 @@ class ScheduleView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+    final dayBoxWidth = (width - 200) / 7;
+    final today = DateTime.now().weekday - 1;
+
     return SingleChildScrollView(
-      child: CustomPaint(
-        size: Size(double.infinity, 24 * hourHeight),
-        painter: TimePaint(
-          hourHeight: hourHeight,
-          dayWidth: (width - 200) / 7,
-          lineColor: lineColor,
-          textColor: textColor,
-        ),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Container(
+              color: Colors.transparent,
+              child: Row(
+                children: [
+                  Container(width: 65, color: Colors.transparent),
+                    ...List.generate(6, (index)
+                    => Container(
+                          width: dayBoxWidth,
+                          height: 24 * hourHeight,
+                          color:
+                              index == today
+                                  ? Colors.grey.withValues(alpha: .2)
+                                  : Colors.transparent,
+                        ),
+                        ),
+                  
+                ],
+              ),
+            ),
+          ),
+          CustomPaint(
+            size: Size(double.infinity, 24 * hourHeight),
+            painter: TimePaint(
+              hourHeight: hourHeight,
+              dayWidth: (width - 200) / 7,
+              lineColor: lineColor,
+              textColor: textColor,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -51,7 +79,7 @@ class TimePaint extends CustomPainter {
     final paint =
         Paint()
           ..color = lineColor
-          ..strokeWidth = 1;
+          ..strokeWidth = 0.3;
 
     final textPainter = TextPainter(textDirection: TextDirection.ltr);
 
@@ -75,9 +103,9 @@ class TimePaint extends CustomPainter {
       final timeText = TextSpan(
         text: '${hour.toString().padLeft(2, '0')}:00',
         style: GoogleFonts.inter(
-          fontSize: 12,
+          fontSize: 11,
           color: textColor,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w300,
         ),
       );
 

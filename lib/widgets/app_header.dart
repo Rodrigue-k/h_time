@@ -69,6 +69,8 @@ class _AppHeaderState extends ConsumerState<AppHeader> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     bool viewMode = ref.watch(scheduleViewModeProvider);
+    final dayBoxWidth = (width - 200) / 7;
+    final today = DateTime.now().weekday - 1;
     return Container(
       height: 130,
       decoration: BoxDecoration(
@@ -184,7 +186,7 @@ class _AppHeaderState extends ConsumerState<AppHeader> {
                   width: 150,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(05),
-                    color: Colors.grey[400],
+                    color: Colors.grey[200],
                   ),
                   child: Row(
                     children: [
@@ -283,12 +285,36 @@ class _AppHeaderState extends ConsumerState<AppHeader> {
             ],
           ),
           Spacer(),
-          CustomPaint(
-            size: Size(double.infinity, 25),
-            painter: DayTableHeader(
-              days: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
-              dayWidth: (width - 200) / 7,
-            ),
+          Stack(
+            children: [
+              Positioned.fill(
+                child: Container(
+                  color: Colors.transparent,
+                  child: Row(
+                    children: [
+                      Container(width: 65, color: Colors.transparent),
+                      ...List.generate(6, (index) {
+                        return Container(
+                          width: dayBoxWidth,
+                          height: 25,
+                          color:
+                              index == today
+                                  ? Colors.grey.withValues(alpha: .2)
+                                  : Colors.transparent,
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+              ),
+              CustomPaint(
+                size: Size(double.infinity, 25),
+                painter: DayTableHeader(
+                  days: ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'],
+                  dayWidth: (width - 200) / 7,
+                ),
+              ),
+            ],
           ),
           /*Row(
             children: [
@@ -339,10 +365,8 @@ class DayTableHeader extends CustomPainter {
   DayTableHeader({required this.dayWidth, required this.days});
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = Colors.green[100]!
-          ..strokeWidth = 1;
+    final paint = Paint()..color = Colors.transparent;
+
     final textPainter = TextPainter(
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
@@ -360,7 +384,7 @@ class DayTableHeader extends CustomPainter {
         style: GoogleFonts.inter(
           fontSize: 13,
           color: Colors.black87,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w500,
         ),
       );
       textPainter
