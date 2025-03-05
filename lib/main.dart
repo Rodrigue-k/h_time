@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:h_time/screens/screens.dart';
+import 'app/app.dart';
 
 void main() {
   runApp(ProviderScope(child: const MyApp()));
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: Colors.grey[100],
       ),
-      home: const MyHomePage(),
+      home: const HTimeApp(),
     );
   }
 }

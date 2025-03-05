@@ -2,68 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ScheduleView extends StatelessWidget {
-  const ScheduleView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Row(
-        children: [
-          Ruler(
-            width: 60,
-            hourHeight: 150,
-            lineColor: Colors.grey.shade400,
-            textColor: Colors.grey.shade700,
-          ),
-          Expanded(
-            child: SizedBox(
-              height: 24 * 150,
-              child: GridView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 7,
-                  mainAxisExtent: 150,
-                  childAspectRatio: 1,
-                ),
-                itemCount: 24 * 7,
-                itemBuilder:
-                    (context, index) => Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        color: Colors.white.withValues(alpha: 0.7),
-                      ),
-                    ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class Ruler extends StatelessWidget {
   final double width;
   final double hourHeight;
+  final double dayWidth;
   final Color lineColor;
   final Color textColor;
-
-  const Ruler({
+  const ScheduleView({
     super.key,
-    this.width = 100,
-    this.hourHeight = 40,
+    this.width = 80,
+    this.hourHeight = 100,
+    this.dayWidth = 200,
     this.lineColor = Colors.grey,
     this.textColor = Colors.grey,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: width,
+    final width = MediaQuery.of(context).size.width;
+    return SingleChildScrollView(
       child: CustomPaint(
-        size: Size(100, 24 * hourHeight),
-        painter: RulerPaint(
+        size: Size(double.infinity, 24 * hourHeight),
+        painter: TimePaint(
           hourHeight: hourHeight,
+          dayWidth: (width - 200) / 7,
           lineColor: lineColor,
           textColor: textColor,
         ),
@@ -72,13 +33,15 @@ class Ruler extends StatelessWidget {
   }
 }
 
-class RulerPaint extends CustomPainter {
+class TimePaint extends CustomPainter {
   final double hourHeight;
+  final double dayWidth;
   final Color lineColor;
   final Color textColor;
 
-  RulerPaint({
+  TimePaint({
     required this.hourHeight,
+    required this.dayWidth,
     required this.lineColor,
     required this.textColor,
   });
@@ -94,13 +57,17 @@ class RulerPaint extends CustomPainter {
 
     for (int hour = 0; hour < 24; hour++) {
       final y = hour * hourHeight;
-      canvas.drawLine(Offset(size.width - 15, y), Offset(size.width, y), paint);
+      canvas.drawLine(
+        Offset(size.width - (size.width - 50), y),
+        Offset(size.width, y),
+        paint,
+      );
 
       final quarterHeight = hourHeight / 4;
       for (int i = 1; i < 4; i++) {
         canvas.drawLine(
-          Offset(size.width - 10, y + (i * quarterHeight)),
-          Offset(size.width, y + (i * quarterHeight)),
+          Offset(size.width - (size.width - 55), y + (i * quarterHeight)),
+          Offset(size.width - (size.width - 65), y + (i * quarterHeight)),
           paint,
         );
       }
@@ -118,17 +85,21 @@ class RulerPaint extends CustomPainter {
         ..text = timeText
         ..layout();
 
-      if(hour == 0){
+      if (hour == 0) {
         textPainter.paint(canvas, Offset(5, y));
-      }else{
+      } else {
         textPainter.paint(canvas, Offset(5, y - textPainter.height / 2));
       }
+    }
 
+    for (int day = 0; day < 7; day++) {
+      final x = day * dayWidth;
+      canvas.drawLine(Offset(x + 65, 0), Offset(x + 65, size.height), paint);
     }
   }
 
   @override
-  bool shouldRepaint(covariant RulerPaint oldDelegate) {
+  bool shouldRepaint(covariant TimePaint oldDelegate) {
     return oldDelegate.hourHeight != hourHeight ||
         oldDelegate.lineColor != lineColor ||
         oldDelegate.textColor != textColor;
