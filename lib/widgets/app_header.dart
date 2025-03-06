@@ -147,6 +147,30 @@ class _AppHeaderState extends ConsumerState<AppHeader> {
                                               () => _description = value,
                                             ),
                                       ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        spacing: 15,
+                                        children: List.generate(
+                                          taskColors.length,
+                                          (index) {
+                                            final color = taskColors[index];
+                                            return GestureDetector(
+                                              //onTap: () => ,
+                                              child: Container(
+                                                height: 30,
+                                                width: 30,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                  color: color,
+                                                  border: Border.all(width: 0.9)
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
