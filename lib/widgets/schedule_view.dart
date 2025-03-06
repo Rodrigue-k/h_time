@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:h_time/providers/providers.dart';
 
-class ScheduleView extends StatelessWidget {
+class ScheduleView extends ConsumerStatefulWidget {
   final double width;
   final double hourHeight;
   final double dayWidth;
@@ -17,9 +19,15 @@ class ScheduleView extends StatelessWidget {
   });
 
   @override
+  ConsumerState<ScheduleView> createState() => _ScheduleViewState();
+}
+
+class _ScheduleViewState extends ConsumerState<ScheduleView> {
+  @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final dayBoxWidth = (width - 200) / 7;
+    bool viewMode = ref.watch(scheduleViewModeProvider);
+    final dayBoxWidth = (width - 215) / 7;
     final today = DateTime.now().weekday - 1;
 
     return SingleChildScrollView(
@@ -31,28 +39,35 @@ class ScheduleView extends StatelessWidget {
               child: Row(
                 children: [
                   Container(width: 65, color: Colors.transparent),
-                    ...List.generate(6, (index)
-                    => Container(
-                          width: dayBoxWidth,
-                          height: 24 * hourHeight,
-                          color:
-                              index == today
-                                  ? Colors.grey.withValues(alpha: .2)
-                                  : Colors.transparent,
-                        ),
-                        ),
-                  
+                  if (viewMode)
+                    Container(
+                      width: dayBoxWidth * 7,
+                      height: 24 * widget.hourHeight,
+                      color: Colors.grey.withValues(alpha: .2),
+                    )
+                  else
+                    ...List.generate(
+                      7,
+                      (index) => Container(
+                        width: dayBoxWidth,
+                        height: 24 * widget.hourHeight,
+                        color:
+                            index == today
+                                ? Colors.grey.withValues(alpha: .2)
+                                : Colors.transparent,
+                      ),
+                    ),
                 ],
               ),
             ),
           ),
           CustomPaint(
-            size: Size(double.infinity, 24 * hourHeight),
+            size: Size(double.infinity, 24 * widget.hourHeight),
             painter: TimePaint(
-              hourHeight: hourHeight,
-              dayWidth: (width - 200) / 7,
-              lineColor: lineColor,
-              textColor: textColor,
+              hourHeight: widget.hourHeight,
+              dayWidth: viewMode ? dayBoxWidth * 7 : dayBoxWidth,
+              lineColor: widget.lineColor,
+              textColor: widget.textColor,
             ),
           ),
         ],
