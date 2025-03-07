@@ -1,20 +1,16 @@
-
-import 'dart:ui';
-import 'package:h_time/utils/constants.dart';
+import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'task_color_provider.g.dart';
 
-
 @riverpod
-class SelectedTaskColor extends _$SelectedTaskColor{
-
+class SelectedTaskColor extends _$SelectedTaskColor {
   @override
-  Color build(){
-    return taskColors[0];
+  Color build() {
+    return Colors.blue; // couleur par défaut
   }
 
-  void selectedColor(Color color){
+  void setColor(Color color) {
     state = color;
   }
 }

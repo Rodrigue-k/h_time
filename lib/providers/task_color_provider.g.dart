@@ -6,7 +6,7 @@ part of 'task_color_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$selectedTaskColorHash() => r'c3e287334647b6080582629ae93718372c6423a2';
+String _$selectedTaskColorHash() => r'40661411af95dc7c35c9a2e882b82ed89435a709';
 
 /// See also [SelectedTaskColor].
 @ProviderFor(SelectedTaskColor)

@@ -1,9 +1,12 @@
+import 'package:flex_color_picker/flex_color_picker.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:h_time/providers/providers.dart';
+import 'package:h_time/providers/task_color_provider.dart';
 import 'package:h_time/utils/utils.dart';
 import 'package:h_time/widgets/widgets.dart';
 
@@ -94,99 +97,7 @@ class _AppHeaderState extends ConsumerState<AppHeader> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 ElevatedButton(
-                  onPressed:
-                      () => showDialog(
-                        context: context,
-                        builder:
-                            (context) => AlertDialog(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              title: Text(
-                                "Nouvelle tâche",
-                                style: GoogleFonts.roboto(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              content: SizedBox(
-                                width: 300,
-                                child: Form(
-                                  key: _formKey,
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    spacing: 10,
-                                    children: [
-                                      TaskTextField(
-                                        labelText: 'Titre',
-                                        maxLines: 1,
-                                        controller: _titleController,
-                                        validator: (value) {
-                                          if (value == null || value.isEmpty) {
-                                            return 'Veuillez entrer une matière';
-                                          }
-                                          return null;
-                                        },
-                                        onChanged:
-                                            (value) =>
-                                                setState(() => _title = value),
-                                      ),
-                                      TaskTextField(
-                                        labelText: 'Description',
-                                        maxLines: 5,
-                                        controller: _descriptionController,
-                                        validator: (value) {
-                                          if (value == null || value.isEmpty) {
-                                            return 'Veuillez entrer une description';
-                                          }
-                                          return null;
-                                        },
-                                        onChanged:
-                                            (value) => setState(
-                                              () => _description = value,
-                                            ),
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        spacing: 15,
-                                        children: List.generate(
-                                          taskColors.length,
-                                          (index) {
-                                            final color = taskColors[index];
-                                            return GestureDetector(
-                                              //onTap: () => ,
-                                              child: Container(
-                                                height: 30,
-                                                width: 30,
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(20),
-                                                  color: color,
-                                                  border: Border.all(width: 0.9)
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text("Annuler"),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () => _submit(),
-                                  child: Text("Ajouter"),
-                                ),
-                              ],
-                            ),
-                      ),
+                  onPressed: () => buildShowDialog(context),
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     shape: RoundedRectangleBorder(
@@ -351,6 +262,76 @@ class _AppHeaderState extends ConsumerState<AppHeader> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<dynamic> buildShowDialog(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            title: Text(
+              "Nouvelle tâche",
+              style: GoogleFonts.roboto(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+            content: SizedBox(
+              width: 300,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 10,
+                  children: [
+                    TaskTextField(
+                      labelText: 'Titre',
+                      maxLines: 1,
+                      controller: _titleController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Veuillez entrer une matière';
+                        }
+                        return null;
+                      },
+                      onChanged: (value) => setState(() => _title = value),
+                    ),
+                    TaskTextField(
+                      labelText: 'Description',
+                      maxLines: 5,
+                      controller: _descriptionController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Veuillez entrer une description';
+                        }
+                        return null;
+                      },
+                      onChanged:
+                          (value) => setState(() => _description = value),
+                    ),
+                    // ... dans buildShowDialog
+                    //
+                    creer une liste de couleur selectionnable pour les taches
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("Annuler"),
+              ),
+              ElevatedButton(
+                onPressed: () => _submit(),
+                child: Text("Ajouter"),
+              ),
+            ],
+          ),
     );
   }
 }
