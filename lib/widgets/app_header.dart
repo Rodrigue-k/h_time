@@ -1,6 +1,4 @@
 import 'package:flex_color_picker/flex_color_picker.dart';
-import 'package:flex_color_scheme/flex_color_scheme.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -22,14 +20,20 @@ class _AppHeaderState extends ConsumerState<AppHeader> {
   final TextEditingController _descriptionController = TextEditingController();
   String _title = '';
   String _description = '';
-  TimeOfDay _startTime = TimeOfDay.now();
-  TimeOfDay _endTime = TimeOfDay.now().replacing(
-    hour: TimeOfDay.now().hour + 1,
-  );
+  TimeOfDay _startTime = TimeOfDay(hour: 15, minute: 30);
+  TimeOfDay _endTime = TimeOfDay(hour: 17, minute: 30);
 
   final _formKey = GlobalKey<FormState>();
 
   List<bool> _selectedDays = List.generate(7, (index) => false);
+
+  Future<TimeOfDay?> _selectTime(BuildContext context, bool isStartTime) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: isStartTime ? _startTime : _endTime,
+    );
+    return picked;
+  }
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
@@ -306,200 +310,235 @@ class _AppHeaderState extends ConsumerState<AppHeader> {
     showDialog(
       context: context,
       builder:
-          (context) => AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            title: Text(
-              "Nouvelle tâche",
-              style: GoogleFonts.roboto(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-              ),
-            ),
-            content: SingleChildScrollView(
-              child: SizedBox(
-                width: 300,
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TaskTextField(
-                        labelText: 'Titre',
-                        maxLines: 1,
-                        controller: _titleController,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer une matière';
-                          }
-                          return null;
-                        },
-                        onChanged: (value) => setState(() => _title = value),
-                      ),
-                      const SizedBox(height: 16),
-                      TaskTextField(
-                        labelText: 'Description',
-                        maxLines: 5,
-                        controller: _descriptionController,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer une description';
-                          }
-                          return null;
-                        },
-                        onChanged:
-                            (value) => setState(() => _description = value),
-                      ),
-                      ColorPicker(
-                        color: ref.watch(selectedTaskColorProvider),
-                        onColorChanged: (Color color) {
-                          ref
-                              .read(selectedTaskColorProvider.notifier)
-                              .selectedColor(color);
-                        },
-                        width: 40,
-                        height: 40,
-                        spacing: 8,
-                        runSpacing: 8,
-                        borderRadius: 20,
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        pickersEnabled: const <ColorPickerType, bool>{
-                          ColorPickerType.primary: false,
-                          ColorPickerType.accent: false,
-                          ColorPickerType.wheel: false,
-                          ColorPickerType.both: false,
-                          ColorPickerType.custom: true,
-                        },
-                        customColorSwatchesAndNames:
-                            ref
-                                .read(selectedTaskColorProvider.notifier)
-                                .getCustomColors(),
-                      ),
-                      SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Début',
-                                  style: GoogleFonts.roboto(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () => _selectTime(context, true),
-                                  child: Container(
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.grey[300]!,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.access_time, size: 16),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          _startTime.format(context),
-                                          style: GoogleFonts.roboto(
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Fin',
-                                  style: GoogleFonts.roboto(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () => _selectTime(context, false),
-                                  child: Container(
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.grey[300]!,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.access_time, size: 16),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          _endTime.format(context),
-                                          style: GoogleFonts.roboto(
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 16),
-                      DaySelector(
-                        selectedDays: _selectedDays,
-                        onChanged:
-                            (days) => setState(() => _selectedDays = days),
-                      ),
-                    ],
+          (context) => StatefulBuilder(
+            builder:
+                (context, setDialogState) => AlertDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
+                  title: Text(
+                    "Nouvelle tâche",
+                    style: GoogleFonts.roboto(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                  content: SingleChildScrollView(
+                    child: SizedBox(
+                      width: 300,
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 15,
+                          children: [
+                            TaskTextField(
+                              labelText: 'Titre',
+                              maxLines: 1,
+                              controller: _titleController,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Veuillez entrer une Tâche';
+                                }
+                                return null;
+                              },
+                              onChanged:
+                                  (value) => setState(() => _title = value),
+                            ),
+                            TaskTextField(
+                              labelText: 'Description',
+                              maxLines: 5,
+                              controller: _descriptionController,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Veuillez entrer une description';
+                                }
+                                return null;
+                              },
+                              onChanged:
+                                  (value) =>
+                                      setState(() => _description = value),
+                            ),
+                            ColorPicker(
+                              color: ref.watch(selectedTaskColorProvider),
+                              onColorChanged: (Color color) {
+                                ref
+                                    .read(selectedTaskColorProvider.notifier)
+                                    .selectedColor(color);
+                              },
+                              width: 40,
+                              height: 40,
+                              spacing: 8,
+                              runSpacing: 8,
+                              borderRadius: 20,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
+                              pickersEnabled: const <ColorPickerType, bool>{
+                                ColorPickerType.primary: false,
+                                ColorPickerType.accent: false,
+                                ColorPickerType.wheel: false,
+                                ColorPickerType.both: false,
+                                ColorPickerType.custom: true,
+                              },
+                              customColorSwatchesAndNames:
+                                  ref
+                                      .read(selectedTaskColorProvider.notifier)
+                                      .getCustomColors(),
+                            ),
+                            DaySelector(
+                              selectedDays: _selectedDays,
+                              onChanged:
+                                  (days) => setDialogState(
+                                    () => _selectedDays = days,
+                                  ),
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Début',
+                                        style: GoogleFonts.roboto(
+                                          fontSize: 12,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                      InkWell(
+                                        onTap: () async {
+                                          final picked = await _selectTime(
+                                            context,
+                                            true,
+                                          );
+                                          if (picked != null) {
+                                            setDialogState(() {
+                                              _startTime = picked;
+
+                                              if (_startTime.hour >
+                                                      _endTime.hour ||
+                                                  (_startTime.hour ==
+                                                          _endTime.hour &&
+                                                      _startTime.minute >=
+                                                          _endTime.minute)) {
+
+                                                int newHour =
+                                                    _startTime.hour + 2;
+
+                                                if (newHour > 23) {
+                                                  newHour = 23;
+                                                }
+                                                _endTime = TimeOfDay(
+                                                  hour: newHour,
+                                                  minute: _startTime.minute,
+                                                );
+                                              }
+                                            });
+                                          }
+                                        },
+                                        child: Container(
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: Colors.grey[300]!,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.access_time, size: 16),
+                                              SizedBox(width: 8),
+                                              Text(
+                                                _startTime.format(context),
+                                                style: GoogleFonts.roboto(
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Fin',
+                                        style: GoogleFonts.roboto(
+                                          fontSize: 12,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                      InkWell(
+                                        onTap: () async {
+                                          final picked = await _selectTime(
+                                            context,
+                                            false,
+                                          );
+                                          if (picked != null) {
+                                            setDialogState(() {
+                                              _endTime = picked;
+                                            });
+                                          }
+                                        },
+                                        child: Container(
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: Colors.grey[300]!,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.access_time, size: 16),
+                                              SizedBox(width: 8),
+                                              Text(
+                                                _endTime.format(context),
+                                                style: GoogleFonts.roboto(
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text('Annuler'),
+                    ),
+                    ElevatedButton(onPressed: _submit, child: Text('Créer')),
+                  ],
                 ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('Annuler'),
-              ),
-              ElevatedButton(onPressed: _submit, child: Text('Créer')),
-            ],
           ),
     );
-  }
-
-  Future<void> _selectTime(BuildContext context, bool isStartTime) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: isStartTime ? _startTime : _endTime,
-    );
-
-    if (picked != null) {
-      setState(() {
-        if (isStartTime) {
-          _startTime = picked;
-        } else {
-          _endTime = picked;
-        }
-      });
-    }
   }
 }
 

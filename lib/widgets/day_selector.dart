@@ -5,10 +5,10 @@ class DaySelector extends StatelessWidget {
   final Function(List<bool>) onChanged;
 
   const DaySelector({
-    Key? key,
+    super.key,
     required this.selectedDays,
     required this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
