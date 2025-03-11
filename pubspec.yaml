@@ -47,8 +47,11 @@ dependencies:
   riverpod_annotation: ^2.6.1
   window_manager: ^0.4.3
   flex_color_picker: ^3.7.0
-  freezed_annotation: ^3.0.0
   json_annotation: ^4.9.0
+  isar: ^3.1.0
+  isar_flutter_libs: ^3.1.0
+  path_provider: ^2.1.2
+ 
   
 
 dev_dependencies:
@@ -62,11 +65,11 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
   riverpod_generator: ^2.6.5
-  build_runner: ^2.4.15
+  build_runner: any
   custom_lint: ^0.7.5
   riverpod_lint: ^2.6.5
-  freezed: ^3.0.3
-  json_serializable: ^6.9.4
+  #isar_generator: ^3.1.0
+  
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

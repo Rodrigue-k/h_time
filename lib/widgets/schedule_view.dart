@@ -132,7 +132,7 @@ class TimePaint extends CustomPainter {
     final paint =
         Paint()
           ..color = lineColor
-          ..strokeWidth = 0.3;
+          ..strokeWidth = 0.4;
 
     final textPainter = TextPainter(textDirection: TextDirection.ltr);
 
@@ -306,7 +306,7 @@ class CurrentTimePainter extends CustomPainter {
     // Ligne pointillée horizontale
     final dashPaint =
         Paint()
-          ..color = Colors.red.withOpacity(0.7)
+          ..color = Colors.red.withValues(alpha: 0.7)
           ..strokeWidth = 1.0
           ..style = PaintingStyle.stroke;
 
