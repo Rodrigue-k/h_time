@@ -12,15 +12,14 @@ String _$selectedTaskColorHash() => r'd156f625fb337482075b69fb9e1f56acd3beaa4c';
 @ProviderFor(SelectedTaskColor)
 final selectedTaskColorProvider =
     AutoDisposeNotifierProvider<SelectedTaskColor, Color>.internal(
-      SelectedTaskColor.new,
-      name: r'selectedTaskColorProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$selectedTaskColorHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  SelectedTaskColor.new,
+  name: r'selectedTaskColorProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$selectedTaskColorHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$SelectedTaskColor = AutoDisposeNotifier<Color>;
 // ignore_for_file: type=lint

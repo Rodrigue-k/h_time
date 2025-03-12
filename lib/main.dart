@@ -2,13 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 import 'app/app.dart';
+import 'services/task_service.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await windowManager.ensureInitialized();
 
+  // Initialiser la base de données
+  final taskService = TaskService();
+  await taskService.init(); 
+
+  // Configuration de la fenêtre
+  await windowManager.ensureInitialized();
   windowManager.setMinimumSize(const Size(800, 600));
-  runApp(ProviderScope(child: const MyApp()));
+
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {

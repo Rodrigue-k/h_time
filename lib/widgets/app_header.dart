@@ -5,7 +5,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:h_time/models/task.dart';
 import 'package:h_time/providers/providers.dart';
-import 'package:h_time/providers/task_color_provider.dart';
 import 'package:h_time/utils/utils.dart';
 import 'package:h_time/widgets/widgets.dart';
 

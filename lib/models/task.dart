@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
-class Task {
+class Task{
   final String id;
   final String title;
   final String description;
@@ -102,3 +102,4 @@ class Task {
     return 'Task{id: $id, title: $title, description: $description, days: $days, startTime: $startTime, endTime: $endTime, color: $color}';
   }
 }
+

@@ -1,14 +1,28 @@
 
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_time/screens/home.dart';
 import 'package:h_time/widgets/widgets.dart';
 
+import '../providers/providers.dart';
 
-class HTimeApp extends StatelessWidget{
+
+class HTimeApp extends ConsumerStatefulWidget {
   const HTimeApp({super.key});
 
+  @override
+  ConsumerState<HTimeApp> createState() => _HTimeAppState();
+}
+
+class _HTimeAppState extends ConsumerState<HTimeApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Charger les tâches au démarrage
+    Future.microtask(() => ref.read(taskNotifierProvider.notifier).refreshTasks());
+  }
+  
   @override
   Widget build(BuildContext context) {
     return SafeArea(

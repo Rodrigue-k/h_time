@@ -92,7 +92,7 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
           CustomPaint(
             size: Size(double.infinity, 24 * widget.hourHeight),
             painter: TaskPainter(
-              tasks: tasks,
+              tasks: tasks.value ?? [],
               hourHeight: widget.hourHeight,
               dayWidth: dayBoxWidth,
               viewMode: viewMode,
