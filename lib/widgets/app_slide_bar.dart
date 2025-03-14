@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:h_time/utils/utils.dart';
 
 class AppSlideBar extends StatelessWidget {
@@ -23,12 +23,13 @@ class AppSlideBar extends StatelessWidget {
             Colors.black,
             'calendrier',
           ),
-          _buildNavItem(FontAwesomeIcons.listCheck, Colors.black, 'Taches'),
+          // _buildNavItem(FontAwesomeIcons.listCheck, Colors.black, 'Taches'),
           //_buildNavItem(FontAwesomeIcons., Colors.black, 'Notes'),
         ],
       ),
     );
   }
+
   InkWell _buildNavItem(IconData? icon, Color color, String name) {
     return InkWell(
       onTap: () {},
@@ -37,7 +38,7 @@ class AppSlideBar extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 08),
         decoration: BoxDecoration(
           color: Colors.grey[200],
-          borderRadius: BorderRadius.all(Radius.circular(10)),
+          borderRadius: BorderRadius.all(Radius.circular(05)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -45,7 +46,13 @@ class AppSlideBar extends StatelessWidget {
           spacing: 10,
           children: [
             Icon(icon, color: color, size: 15),
-            Text(name, style: TextStyle(color: color, fontSize: 12)),
+            Text(
+              name,
+              style: GoogleFonts.roboto(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
           ],
         ),
       ),

@@ -1,12 +1,9 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:h_time/screens/home.dart';
 import 'package:h_time/widgets/widgets.dart';
 
 import '../providers/providers.dart';
-
+import '../screens/screens.dart';
 
 class HTimeApp extends ConsumerStatefulWidget {
   const HTimeApp({super.key});
@@ -20,23 +17,20 @@ class _HTimeAppState extends ConsumerState<HTimeApp> {
   void initState() {
     super.initState();
     // Charger les tâches au démarrage
-    Future.microtask(() => ref.read(taskNotifierProvider.notifier).refreshTasks());
+    Future.microtask(
+        () => ref.read(taskNotifierProvider.notifier).refreshTasks());
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: Row(
-          children: [AppSlideBar(), Home()],
-        ),
+        body: HomeScreen(),
       ),
     );
   }
 
-
-
-
+//AppSlideBar(),
   /*InkWell _buildProgram() {
     return InkWell(
       onTap: () {},
@@ -62,10 +56,4 @@ class _HTimeAppState extends ConsumerState<HTimeApp> {
       ),
     );
   }*/
-
-
-
-
 }
-
-

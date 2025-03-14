@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -26,6 +27,8 @@ class ScheduleView extends ConsumerStatefulWidget {
 
 class _ScheduleViewState extends ConsumerState<ScheduleView> {
   Timer? _timer;
+  Task? _popUpTask;
+  Offset? _popUpPosition;
 
   @override
   void initState() {
@@ -41,20 +44,152 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
     super.dispose();
   }
 
+  // Construction de la fenêtre pop-up
+  Widget _buildPopUp(Task task, Offset position) {
+    double popUpWidth = 200.0;
+    double popUpHeight = 150.0;
+    double left = position.dx - popUpWidth / 2;
+    bool isAbove = position.dy - popUpHeight > 0;
+    double top = isAbove ? position.dy - popUpHeight : position.dy;
+
+    // Ajustement pour rester dans les limites de l'écran
+    left = left.clamp(0.0, MediaQuery.of(context).size.width - popUpWidth);
+    top = top.clamp(0.0, MediaQuery.of(context).size.height - popUpHeight);
+
+    return Positioned(
+      left: left,
+      top: top,
+      child: Stack(
+        children: [
+          Container(
+            width: popUpWidth,
+            height: popUpHeight,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 5,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  task.title,
+                  style: GoogleFonts.roboto(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  'Début: ${task.startTime.format(context)}',
+                  style: GoogleFonts.roboto(fontSize: 14),
+                ),
+                Text(
+                  'Fin: ${task.endTime.format(context)}',
+                  style: GoogleFonts.roboto(fontSize: 14),
+                ),
+                const Spacer(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        // Logique de modification à implémenter
+                        print('Modifier la tâche: ${task.title}');
+                      },
+                      child: const Text('Modifier'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Logique de suppression à implémenter
+                        print('Supprimer la tâche: ${task.title}');
+                      },
+                      child: const Text('Supprimer'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _popUpTask = null;
+                        });
+                      },
+                      child: const Text('Fermer'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            left: popUpWidth / 2 - 10,
+            bottom: isAbove ? -10 : null,
+            top: isAbove ? null : -10,
+            child: CustomPaint(
+              painter: ArrowPainter(isAbove: isAbove),
+              size: const Size(20, 10),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     bool viewMode = ref.watch(scheduleViewModeProvider);
-    final dayBoxWidth = (width - 215) / 7;
+    int selectedColonne = ref.watch(selectedColonneProvider);
+    //final dayBoxWidth = (width - 215) / 7;
+    final dayBoxWidth = (width - 215 + 150) / 7;
     final today = DateTime.now().weekday - 1;
     final tasks = ref.watch(taskNotifierProvider);
 
-    return SingleChildScrollView(
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: Container(
-              color: Colors.transparent,
+    return Container(
+      color: Colors.white,
+      child: SingleChildScrollView(
+        child: Stack(
+          children: [
+            //Graduation de l'heure
+            CustomPaint(
+              size: Size(double.infinity, 24 * widget.hourHeight),
+              painter: TimePaint(
+                hourHeight: widget.hourHeight,
+                dayWidth: viewMode ? dayBoxWidth * 7 : dayBoxWidth,
+                lineColor: widget.lineColor,
+                textColor: widget.textColor,
+              ),
+            ),
+
+            //dessin de la l'indicateur
+            CustomPaint(
+              size: Size(double.infinity, 24 * widget.hourHeight),
+              painter: CurrentTimePainter(
+                hourHeight: widget.hourHeight,
+                dayWidth: dayBoxWidth,
+                viewMode: viewMode,
+                today: today,
+              ),
+            ),
+
+            //dessin des taches
+            CustomPaint(
+              size: Size(double.infinity, 24 * widget.hourHeight),
+              painter: TaskPainter(
+                tasks: tasks.value ?? [],
+                hourHeight: widget.hourHeight,
+                dayWidth: dayBoxWidth,
+                viewMode: viewMode,
+                selectedDay: today,
+              ),
+            ),
+
+            Positioned.fill(
               child: Row(
                 children: [
                   Container(width: 65, color: Colors.transparent),
@@ -67,51 +202,34 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
                   else
                     ...List.generate(
                       7,
-                      (index) => Container(
-                        width: dayBoxWidth,
-                        height: 24 * widget.hourHeight,
-                        color:
-                            index == today
-                                ? Colors.grey.withValues(alpha: .2)
-                                : Colors.transparent,
+                      (index) => GestureDetector(
+                        onTap: () => setState(() {
+                          if (kDebugMode) {
+                            print('Clique');
+                          }
+                          ref.read(selectedColonneProvider.notifier).state =
+                              index;
+                        }),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 800),
+                          width: dayBoxWidth,
+                          height: 24 * widget.hourHeight,
+                          color: (index == today) || (selectedColonne == index)
+                              ? Colors.grey.withValues(alpha: .2)
+                              : Colors.transparent,
+                        ),
                       ),
                     ),
                 ],
               ),
             ),
-          ),
-          CustomPaint(
-            size: Size(double.infinity, 24 * widget.hourHeight),
-            painter: TimePaint(
-              hourHeight: widget.hourHeight,
-              dayWidth: viewMode ? dayBoxWidth * 7 : dayBoxWidth,
-              lineColor: widget.lineColor,
-              textColor: widget.textColor,
-            ),
-          ),
-          CustomPaint(
-            size: Size(double.infinity, 24 * widget.hourHeight),
-            painter: TaskPainter(
-              tasks: tasks.value ?? [],
-              hourHeight: widget.hourHeight,
-              dayWidth: dayBoxWidth,
-              viewMode: viewMode,
-              selectedDay: today,
-            ),
-          ),
-          CustomPaint(
-            size: Size(double.infinity, 24 * widget.hourHeight),
-            painter: CurrentTimePainter(
-              hourHeight: widget.hourHeight,
-              dayWidth: dayBoxWidth,
-              viewMode: viewMode,
-              today: today,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  
   }
+
 }
 
 class TimePaint extends CustomPainter {
@@ -129,10 +247,9 @@ class TimePaint extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = lineColor
-          ..strokeWidth = 0.4;
+    final paint = Paint()
+      ..color = lineColor
+      ..strokeWidth = 0.4;
 
     final textPainter = TextPainter(textDirection: TextDirection.ltr);
 
@@ -231,19 +348,18 @@ class TaskPainter extends CustomPainter {
           canvas.drawRRect(
             rect.shift(Offset(0, 1)),
             Paint()
-              ..color = Colors.black.withOpacity(0.1)
+              ..color = Colors.black.withValues(alpha: .1)
               ..maskFilter = MaskFilter.blur(BlurStyle.normal, 1),
           );
 
           // Dessin du fond
-          canvas.drawRRect(rect, Paint()..color = task.color.withValues(alpha: 0.7));
+          canvas.drawRRect(
+              rect, Paint()..color = task.color.withValues(alpha: 0.7));
 
           // Dessin de la bordure gauche colorée
           canvas.drawRRect(
-            RRect.fromRectAndCorners(
-              Rect.fromLTWH(x, startY, 8, height),
-            topLeft: Radius.circular(5),
-            bottomLeft: Radius.circular(5)),
+            RRect.fromRectAndCorners(Rect.fromLTWH(x, startY, 8, height),
+                topLeft: Radius.circular(5), bottomLeft: Radius.circular(5)),
             Paint()..color = task.color,
           );
 
@@ -296,19 +412,17 @@ class CurrentTimePainter extends CustomPainter {
     final currentY = (now.hour + now.minute / 60.0) * hourHeight;
 
     // Point rouge à gauche avec effet de glow
-    final circlePaint =
-        Paint()
-          ..color = Colors.red
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, 2);
+    final circlePaint = Paint()
+      ..color = Colors.red
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 2);
 
     canvas.drawCircle(Offset(65.0, currentY), 4.0, circlePaint);
 
     // Ligne pointillée horizontale
-    final dashPaint =
-        Paint()
-          ..color = Colors.red.withValues(alpha: 0.7)
-          ..strokeWidth = 1.0
-          ..style = PaintingStyle.stroke;
+    final dashPaint = Paint()
+      ..color = Colors.red.withValues(alpha: 0.7)
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
 
     // Dessin des pointillés
     double startX = 65.0;
@@ -345,10 +459,9 @@ class CurrentTimePainter extends CustomPainter {
     textPainter.layout();
 
     // Dessin du fond blanc pour l'heure
-    final textBackgroundPaint =
-        Paint()
-          ..color = Colors.white.withOpacity(0.9)
-          ..style = PaintingStyle.fill;
+    final textBackgroundPaint = Paint()
+      ..color = Colors.white.withOpacity(0.9)
+      ..style = PaintingStyle.fill;
 
     final textBackgroundRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(
@@ -384,4 +497,30 @@ class CurrentTimePainter extends CustomPainter {
   bool shouldRepaint(covariant CurrentTimePainter oldDelegate) {
     return true;
   }
+}
+
+class ArrowPainter extends CustomPainter {
+  final bool isAbove;
+
+  ArrowPainter({required this.isAbove});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.white;
+    final path = Path();
+    if (isAbove) {
+      path.moveTo(0, 0);
+      path.lineTo(size.width / 2, size.height);
+      path.lineTo(size.width, 0);
+    } else {
+      path.moveTo(0, size.height);
+      path.lineTo(size.width / 2, 0);
+      path.lineTo(size.width, size.height);
+    }
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

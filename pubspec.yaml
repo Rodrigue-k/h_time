@@ -51,6 +51,8 @@ dependencies:
   json_annotation: ^4.9.0
   path_provider: ^2.1.2
   ffi: ^2.1.4
+  printing: ^5.14.2
+  pdf: ^3.11.3
  
   
 

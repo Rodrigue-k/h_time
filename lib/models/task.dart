@@ -97,6 +97,8 @@ class Task{
       endTime.hashCode ^
       color.hashCode;
 
+  get startHour => null;
+
   @override
   String toString() {
     return 'Task{id: $id, title: $title, description: $description, days: $days, startTime: $startTime, endTime: $endTime, color: $color}';
