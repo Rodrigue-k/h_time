@@ -30,6 +30,8 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
   Task? _popUpTask;
   Offset? _popUpPosition;
 
+   Map<String, Offset> _activePopUps = {}; 
+
   @override
   void initState() {
     super.initState();
@@ -45,101 +47,116 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
   }
 
   // Construction de la fenêtre pop-up
-  Widget _buildPopUp(Task task, Offset position) {
-    double popUpWidth = 200.0;
-    double popUpHeight = 150.0;
-    double left = position.dx - popUpWidth / 2;
-    bool isAbove = position.dy - popUpHeight > 0;
-    double top = isAbove ? position.dy - popUpHeight : position.dy;
+Widget _buildPopUp(Task task, Offset position) {
+  double popUpWidth = 250.0; // Augmenté légèrement pour plus d'espace
+  double popUpHeight = 180.0; // Ajusté pour accueillir les boutons en Wrap
+  double left = position.dx - popUpWidth / 2;
+  bool isAbove = position.dy - popUpHeight > 0;
+  double top = isAbove ? position.dy - popUpHeight : position.dy;
 
-    // Ajustement pour rester dans les limites de l'écran
-    left = left.clamp(0.0, MediaQuery.of(context).size.width - popUpWidth);
-    top = top.clamp(0.0, MediaQuery.of(context).size.height - popUpHeight);
+  left = left.clamp(0.0, MediaQuery.of(context).size.width - popUpWidth);
+  top = top.clamp(0.0, MediaQuery.of(context).size.height - popUpHeight);
 
-    return Positioned(
-      left: left,
-      top: top,
-      child: Stack(
-        children: [
-          Container(
-            width: popUpWidth,
-            height: popUpHeight,
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 5,
-                  offset: Offset(0, 2),
+  return Positioned(
+    left: left,
+    top: top,
+    child: Stack(
+      children: [
+        Container(
+          width: popUpWidth,
+          height: popUpHeight,
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 5,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                task.title,
+                style: GoogleFonts.roboto(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  task.title,
-                  style: GoogleFonts.roboto(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+              ),
+              const SizedBox(height: 5),
+              Text(
+                'Début: ${task.startTime.format(context)}',
+                style: GoogleFonts.roboto(fontSize: 14),
+              ),
+              Text(
+                'Fin: ${task.endTime.format(context)}',
+                style: GoogleFonts.roboto(fontSize: 14),
+              ),
+              const Spacer(),
+              // Remplacement du Row par un Wrap pour éviter l'overflow
+              Wrap(
+                spacing: 8.0, // Espacement horizontal entre les boutons
+                runSpacing: 8.0, // Espacement vertical si les boutons passent à la ligne suivante
+                alignment: WrapAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      print('Modifier la tâche: ${task.title}');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8), // Boutons plus compacts
+                      minimumSize: const Size(0, 36), // Taille minimale réduite
+                    ),
+                    child: const Text('Modifier'),
                   ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  'Début: ${task.startTime.format(context)}',
-                  style: GoogleFonts.roboto(fontSize: 14),
-                ),
-                Text(
-                  'Fin: ${task.endTime.format(context)}',
-                  style: GoogleFonts.roboto(fontSize: 14),
-                ),
-                const Spacer(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        // Logique de modification à implémenter
-                        print('Modifier la tâche: ${task.title}');
-                      },
-                      child: const Text('Modifier'),
+                  ElevatedButton(
+                    onPressed: () {
+                      ref.read(taskNotifierProvider.notifier).removeTask(task.id);
+                      setState(() {
+                        _activePopUps.remove(task.id);
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      minimumSize: const Size(0, 36),
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        // Logique de suppression à implémenter
-                        print('Supprimer la tâche: ${task.title}');
-                      },
-                      child: const Text('Supprimer'),
+                    child: const Text('Supprimer'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _activePopUps.remove(task.id);
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      minimumSize: const Size(0, 36),
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _popUpTask = null;
-                        });
-                      },
-                      child: const Text('Fermer'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                    child: const Text('Fermer'),
+                  ),
+                ],
+              ),
+            ],
           ),
-          Positioned(
-            left: popUpWidth / 2 - 10,
-            bottom: isAbove ? -10 : null,
-            top: isAbove ? null : -10,
-            child: CustomPaint(
-              painter: ArrowPainter(isAbove: isAbove),
-              size: const Size(20, 10),
-            ),
+        ),
+        Positioned(
+          left: popUpWidth / 2 - 10,
+          bottom: isAbove ? -10 : null,
+          top: isAbove ? null : -10,
+          child: CustomPaint(
+            painter: ArrowPainter(isAbove: isAbove),
+            size: const Size(20, 10),
           ),
-        ],
-      ),
-    );
-  }
-
+        ),
+      ],
+    ),
+  );
+}
+ 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -152,83 +169,161 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
 
     return Container(
       color: Colors.white,
+      
       child: SingleChildScrollView(
-        child: Stack(
-          children: [
-            //Graduation de l'heure
-            CustomPaint(
-              size: Size(double.infinity, 24 * widget.hourHeight),
-              painter: TimePaint(
-                hourHeight: widget.hourHeight,
-                dayWidth: viewMode ? dayBoxWidth * 7 : dayBoxWidth,
-                lineColor: widget.lineColor,
-                textColor: widget.textColor,
+        child: Container(
+          width: MediaQuery.of(context).size.width, // Largeur finie
+        height: 24 * widget.hourHeight,
+          child: Stack(
+            children: [
+              //Graduation de l'heure
+              CustomPaint(
+                size: Size(double.infinity, 24 * widget.hourHeight),
+                painter: TimePaint(
+                  hourHeight: widget.hourHeight,
+                  dayWidth: viewMode ? dayBoxWidth * 7 : dayBoxWidth,
+                  lineColor: widget.lineColor,
+                  textColor: widget.textColor,
+                ),
               ),
-            ),
-
-            //dessin de la l'indicateur
-            CustomPaint(
-              size: Size(double.infinity, 24 * widget.hourHeight),
-              painter: CurrentTimePainter(
-                hourHeight: widget.hourHeight,
-                dayWidth: dayBoxWidth,
-                viewMode: viewMode,
-                today: today,
+          
+              //dessin de la l'indicateur
+              CustomPaint(
+                size: Size(double.infinity, 24 * widget.hourHeight),
+                painter: CurrentTimePainter(
+                  hourHeight: widget.hourHeight,
+                  dayWidth: dayBoxWidth,
+                  viewMode: viewMode,
+                  today: today,
+                ),
               ),
-            ),
-
-            //dessin des taches
-            CustomPaint(
-              size: Size(double.infinity, 24 * widget.hourHeight),
-              painter: TaskPainter(
-                tasks: tasks.value ?? [],
-                hourHeight: widget.hourHeight,
-                dayWidth: dayBoxWidth,
-                viewMode: viewMode,
-                selectedDay: today,
-              ),
-            ),
-
-            Positioned.fill(
-              child: Row(
-                children: [
-                  Container(width: 65, color: Colors.transparent),
-                  if (viewMode)
-                    Container(
-                      width: dayBoxWidth * 7,
-                      height: 24 * widget.hourHeight,
-                      color: Colors.grey.withValues(alpha: .2),
-                    )
-                  else
-                    ...List.generate(
-                      7,
-                      (index) => GestureDetector(
-                        onTap: () => setState(() {
-                          if (kDebugMode) {
-                            print('Clique');
-                          }
-                          ref.read(selectedColonneProvider.notifier).state =
-                              index;
-                        }),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 800),
-                          width: dayBoxWidth,
-                          height: 24 * widget.hourHeight,
-                          color: (index == today) || (selectedColonne == index)
-                              ? Colors.grey.withValues(alpha: .2)
-                              : Colors.transparent,
+          
+              
+          
+              Positioned.fill(
+                child: Row(
+                  children: [
+                    Container(width: 65, color: Colors.transparent),
+                    if (viewMode)
+                      Container(
+                        width: dayBoxWidth * 7,
+                        height: 24 * widget.hourHeight,
+                        color: Colors.grey.withValues(alpha: .2),
+                      )
+                    else
+                      ...List.generate(
+                        7,
+                        (index) => GestureDetector(
+                          onTap: () => setState(() {
+                            if (kDebugMode) {
+                              print('Clique');
+                            }
+                            ref.read(selectedColonneProvider.notifier).state =
+                                index;
+                          }),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 800),
+                            width: dayBoxWidth,
+                            height: 24 * widget.hourHeight,
+                            color: (index == today) || (selectedColonne == index)
+                                ? Colors.grey.withValues(alpha: .2)
+                                : Colors.transparent,
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+               //construire les taches
+              buildTasks(),
+            ],
+          ),
         ),
       ),
     );
-  
   }
+
+Widget buildTasks() {
+  final tasks = ref.watch(taskNotifierProvider).value ?? [];
+  final dayBoxWidth = (MediaQuery.of(context).size.width - 215 + 150) / 7;
+  final today = DateTime.now().weekday - 1;
+  bool viewMode = ref.watch(scheduleViewModeProvider);
+
+  return Stack(
+    children: tasks.expand<Widget>((task) {
+      if (viewMode && !task.days[today]) return <Widget>[]; // Retourner une liste vide si la tâche ne correspond pas
+
+      final startY = (task.startTime.hour + task.startTime.minute / 60) * widget.hourHeight;
+      final endY = (task.endTime.hour + task.endTime.minute / 60) * widget.hourHeight;
+      final height = endY - startY;
+
+      List<Widget> taskWidgets = [];
+      for (int i = 0; i < task.days.length; i++) {
+        if (!task.days[i]) continue;
+        if (!viewMode || (viewMode && i == today)) {
+          final double x = viewMode ? 65 : 65 + (i * dayBoxWidth);
+          final width = viewMode ? dayBoxWidth * 7 : dayBoxWidth;
+
+          // Position du centre de la tâche pour le pop-up
+          final taskCenter = Offset(x + width / 2, startY + height / 2);
+
+          taskWidgets.add(
+            Positioned(
+              left: x,
+              top: startY,
+              width: width,
+              height: height,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    if (_activePopUps.containsKey(task.id)) {
+                      _activePopUps.remove(task.id); // Ferme le pop-up si déjà ouvert
+                    } else {
+                      _activePopUps[task.id] = taskCenter; // Ouvre le pop-up
+                    }
+                    if (kDebugMode) {
+                      print('Tâche cliquée : ${task.title}, Pop-up : ${_activePopUps.containsKey(task.id)}');
+                    }
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: task.color.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 1,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      task.title,
+                      style: GoogleFonts.roboto(
+                        color: Colors.black87,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+
+          // Ajouter le pop-up si la tâche est dans _activePopUps
+          if (_activePopUps.containsKey(task.id)) {
+            taskWidgets.add(_buildPopUp(task, _activePopUps[task.id]!));
+          }
+        }
+      }
+      return taskWidgets; // Retourne la liste des widgets (tâche + pop-up si actif)
+    }).toList(),
+  );
+}
 
 }
 
