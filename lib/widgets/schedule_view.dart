@@ -134,8 +134,9 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
 
     return Stack(
       children: tasks.expand<Widget>((task) {
-        if (viewMode && !task.days[today])
+        if (viewMode && !task.days[today]) {
           return <Widget>[]; // Retourner une liste vide si la tâche ne correspond pas
+        }
 
         final startY = (task.startTime.hour + task.startTime.minute / 60) *
             widget.hourHeight;
@@ -150,6 +151,8 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
             final double x = viewMode ? 65 : 65 + (i * dayBoxWidth);
             final width = viewMode ? dayBoxWidth * 7 : dayBoxWidth;
 
+            final taskKey = GlobalKey();
+
             taskWidgets.add(
               Positioned(
                 left: x,
@@ -158,17 +161,24 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
                 height: height,
                 child: GestureDetector(
                   onTap: () {
+                    final keyContext = taskKey.currentContext!;
                     if (kDebugMode) {
                       print('Tâche cliquée : ${task.title}');
                     }
-                    setState(() {
-                      _showTaskDetailsDialog(task);
-                    });
+
+                    _showTaskDetailsDialog(task, keyContext);
                   },
                   child: Container(
+                    key: taskKey,
                     decoration: BoxDecoration(
                       color: task.color.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(5),
+                      border: Border(
+                        left: BorderSide(
+                          color: task.color, // Bordure colorée à gauche
+                          width: 4,
+                        ),
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.1),
@@ -199,62 +209,350 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
     );
   }
 
-  void _showTaskDetailsDialog(Task task) {
+  final _popupKey = GlobalKey();
+  Offset? _taskTapPosition;
+
+void _showTaskDetailsDialog(Task task, BuildContext taskContext) async {
+  final RenderBox renderBox = taskContext.findRenderObject() as RenderBox;
+  final offset = renderBox.localToGlobal(Offset.zero);
+  final size = renderBox.size;
+
+  setState(() {
+    _taskTapPosition = Offset(
+      offset.dx + size.width / 2,
+      offset.dy + size.height / 2,
+    );
+  });
+
+  await showDialog(
+    context: context,
+    builder: (context) {
+      return Stack(
+        children: [
+          // Fond semi-transparent
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(color: Colors.black.withOpacity(0.6)), // Fond plus sombre pour un meilleur contraste
+            ),
+          ),
+          // Positionnement du popup
+          if (_taskTapPosition != null)
+            Positioned(
+              left: _taskTapPosition!.dx - 150, // Centré horizontalement
+              top: _taskTapPosition!.dy - 100,  // Centré verticalement
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  key: _popupKey, // Clé préservée
+                  width: 320, // Légèrement plus large pour un meilleur espacement
+                  padding: const EdgeInsets.all(16), // Padding global
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16), // Coins plus arrondis
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.15), // Ombre plus douce
+                        blurRadius: 12,
+                        spreadRadius: 2,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: Colors.grey.shade200, // Bordure subtile
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min, // Taille minimale pour éviter l'excès
+                    children: [
+                      // Flèche de positionnement
+                      CustomPaint(
+                        size: const Size(20, 10),
+                        painter: _ArrowPainter(
+                          color: Colors.white,
+                          position: _taskTapPosition!,
+                        ),
+                      ),
+                      // Titre avec une icône ou une barre colorée
+                      Row(
+                        children: [
+                          Container(
+                            width: 4,
+                            height: 24,
+                            color: task.color, // Barre verticale colorée
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              task.title,
+                              style: GoogleFonts.roboto(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Informations avec icônes
+                      _buildInfoRow('Début:', task.startTime, icon: Icons.access_time),
+                      _buildInfoRow('Fin:', task.endTime, icon: Icons.access_time_filled),
+                      const SizedBox(height: 16),
+                      // Jours de répétition
+                      Text(
+                        'Jours de répétition:',
+                        style: GoogleFonts.roboto(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8, // Espacement vertical entre les lignes
+                        children: List.generate(
+                          7,
+                          (index) => Chip(
+                            label: Text(
+                              _dayName(index),
+                              style: GoogleFonts.roboto(
+                                fontSize: 12,
+                                color: task.days[index] ? task.color : Colors.grey.shade600,
+                              ),
+                            ),
+                            backgroundColor: task.days[index]
+                                ? task.color.withOpacity(0.2)
+                                : Colors.grey.shade100,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12), // Chips arrondis
+                              side: BorderSide(
+                                color: task.days[index] ? task.color.withOpacity(0.5) : Colors.grey.shade300,
+                              ),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      // Boutons d'action
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.grey.shade600, // Couleur plus douce
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            ),
+                            child: const Text('Annuler'),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _editTask(task);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: task.color,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              elevation: 2,
+                            ),
+                            child: const Text('Modifier'),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              ref.read(taskNotifierProvider.notifier).removeTask(task.id); // Suppression via Riverpod
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.redAccent, // Couleur rouge pour la suppression
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              elevation: 2,
+                            ),
+                            child: const Text('Supprimer'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
+      );
+    },
+  );
+}
+
+// Méthode utilitaire pour les lignes d'information avec icônes
+Widget _buildInfoRow(String label, TimeOfDay time, {IconData? icon}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      children: [
+        if (icon != null) ...[
+          Icon(icon, size: 18, color: Colors.grey.shade600),
+          const SizedBox(width: 8),
+        ],
+        Text(
+          label,
+          style: GoogleFonts.roboto(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '${time.hour}h${time.minute.toString().padLeft(2, '0')}', // Utilisation du formatage existant
+          style: GoogleFonts.roboto(
+            fontSize: 14,
+            color: Colors.black87,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+// Exemple pour _dayName (à adapter selon votre implémentation)
+String _dayName(int index) {
+  const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+  return days[index];
+}
+  void _editTask(Task task) {
+    // Créez des contrôleurs pour les champs de formulaire
+    final titleController = TextEditingController(text: task.title);
+    final startTimeController = TextEditingController(
+      text:
+          '${task.startTime.hour}:${task.startTime.minute.toString().padLeft(2, '0')}',
+    );
+    final endTimeController = TextEditingController(
+      text:
+          '${task.endTime.hour}:${task.endTime.minute.toString().padLeft(2, '0')}',
+    );
+
+    // Créez une liste de booléens pour les jours sélectionnés
+    final List<bool> selectedDays = List.from(task.days);
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(task.title),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Début: ${task.startTime.hour}h${task.startTime.minute.toString().padLeft(2, '0')}',
-                style: GoogleFonts.roboto(),
-              ),
-              Text(
-                'Fin: ${task.endTime.hour}h${task.endTime.minute.toString().padLeft(2, '0')}',
-                style: GoogleFonts.roboto(),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Jours:',
-                style: GoogleFonts.roboto(fontWeight: FontWeight.bold),
-              ),
-              ...List.generate(
-                7,
-                (index) => Row(
-                  children: [
-                    Checkbox(
-                      value: task.days[index],
-                      onChanged: null, // Désactivé en mode visualisation
-                    ),
-                    Text(_dayName(index)),
-                  ],
+          title: Text('Modifier la tâche'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: InputDecoration(
+                    labelText: 'Titre',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(height: 16),
+                TextField(
+                  controller: startTimeController,
+                  decoration: InputDecoration(
+                    labelText: 'Heure de début (HH:MM)',
+                    border: OutlineInputBorder(),
+                  ),
+                  onTap: () async {
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime: task.startTime,
+                    );
+                    if (time != null) {
+                      startTimeController.text =
+                          '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
+                    }
+                  },
+                ),
+                SizedBox(height: 16),
+                TextField(
+                  controller: endTimeController,
+                  decoration: InputDecoration(
+                    labelText: 'Heure de fin (HH:MM)',
+                    border: OutlineInputBorder(),
+                  ),
+                  onTap: () async {
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime: task.endTime,
+                    );
+                    if (time != null) {
+                      endTimeController.text =
+                          '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
+                    }
+                  },
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Jours de répétition :',
+                  style: GoogleFonts.roboto(fontWeight: FontWeight.bold),
+                ),
+                ...List.generate(7, (index) {
+                  return CheckboxListTile(
+                    title: Text(_dayName(index)),
+                    value: selectedDays[index],
+                    onChanged: (value) {
+                      setState(() {
+                        selectedDays[index] = value!;
+                      });
+                    },
+                  );
+                }),
+              ],
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Annuler'),
+              child: Text('Annuler'),
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: () {
-                ref.read(taskNotifierProvider.notifier).removeTask(task.id);
+                // Validez et enregistrez les modifications
+                final newTitle = titleController.text.trim();
+                final newStartTime = _parseTime(startTimeController.text);
+                final newEndTime = _parseTime(endTimeController.text);
+
+                if (newTitle.isEmpty ||
+                    newStartTime == null ||
+                    newEndTime == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text(
+                            'Veuillez remplir tous les champs correctement')),
+                  );
+                  return;
+                }
+
+                final updatedTask = task.copyWith(
+                  title: newTitle,
+                  startTime: newStartTime,
+                  endTime: newEndTime,
+                  days: selectedDays,
+                );
+
+                ref.read(taskNotifierProvider.notifier).updateTask(updatedTask);
                 Navigator.pop(context);
               },
-              child:
-                  const Text('Supprimer', style: TextStyle(color: Colors.red)),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                // Ajouter la logique de modification ici
-              },
-              child: const Text('Modifier'),
+              child: Text('Enregistrer'),
             ),
           ],
         );
@@ -262,10 +560,16 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
     );
   }
 
-  String _dayName(int index) {
-    final days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-    return days[index];
+// Méthode utilitaire pour parser l'heure
+  TimeOfDay? _parseTime(String time) {
+    final parts = time.split(':');
+    if (parts.length != 2) return null;
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) return null;
+    return TimeOfDay(hour: hour, minute: minute);
   }
+
 }
 
 class TimePaint extends CustomPainter {
@@ -533,4 +837,25 @@ class CurrentTimePainter extends CustomPainter {
   bool shouldRepaint(covariant CurrentTimePainter oldDelegate) {
     return true;
   }
+}
+
+class _ArrowPainter extends CustomPainter {
+  final Color color;
+  final Offset position;
+
+  _ArrowPainter({required this.color, required this.position});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color;
+    final path = Path()
+      ..moveTo(0, size.height)
+      ..lineTo(size.width / 2, 0)
+      ..lineTo(size.width, size.height)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

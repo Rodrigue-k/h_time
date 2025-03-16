@@ -64,12 +64,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(130),
-        child: AppHeader(handleCapture: _handleCapture),
+    return RepaintBoundary(
+      key: _globalKey,
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(130),
+          child: AppHeader(handleCapture: _handleCapture),
+        ),
+        body: ScheduleView(),
       ),
-      body: RepaintBoundary(key: _globalKey, child: ScheduleView()),
     );
   }
 }

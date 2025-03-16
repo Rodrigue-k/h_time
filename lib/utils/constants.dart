@@ -17,9 +17,13 @@ const Color secondaryColor = Color.fromARGB(240, 255, 255, 255);
   Color(0xFFFF77E4),
 ];*/
 
-final Map<ColorSwatch<Object>, String> customColors = {
-  ColorSwatch(0xFFFF0000, {'primary': Color(0xFFFF0000)}): 'Rouge',
-  ColorSwatch(0xFF00FF00, {'primary': Color(0xFF00FF00)}): 'Vert',
-  ColorSwatch(0xFF0000FF, {'primary': Color(0xFF0000FF)}): 'Bleu',
-  // Ajoute d'autres couleurs selon tes besoins
-};
+// Liste des couleurs disponibles
+    final List<Color> taskColors = [
+      const Color(0xFFFF7B7B), // Rouge
+      const Color(0xFFFFB677), // Orange
+      const Color(0xFFFFE577), // Jaune
+      const Color(0xFF77FF8F), // Vert
+      const Color(0xFF77D6FF), // Bleu
+      const Color(0xFF9C77FF), // Violet
+      const Color(0xFFFF77E4), // Rose
+    ];

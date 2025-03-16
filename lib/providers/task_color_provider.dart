@@ -7,15 +7,12 @@ part 'task_color_provider.g.dart';
 @riverpod
 class SelectedTaskColor extends _$SelectedTaskColor {
   @override
-  Color build() {
-    return customColors.keys.first[500]!;
+  int build() {
+    return 0; // Index de la couleur par défaut (rouge)
   }
 
-  void selectedColor(Color color) {
-    state = color;
-  }
-
-  Map<ColorSwatch<Object>, String> getCustomColors() {
-    return customColors;
+  void selectColor(int index) {
+    print('Index de couleur mis à jour dans le provider : $index'); // Log de l'index mis à jour
+    state = index;
   }
 }

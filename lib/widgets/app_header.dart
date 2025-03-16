@@ -1,4 +1,4 @@
-import 'package:flex_color_picker/flex_color_picker.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:h_time/models/task.dart';
 import 'package:h_time/providers/providers.dart';
 import 'package:h_time/utils/utils.dart';
+import 'package:h_time/widgets/custom_color_piker.dart';
 import 'package:h_time/widgets/widgets.dart';
 
 class AppHeader extends ConsumerStatefulWidget {
@@ -36,7 +37,10 @@ class _AppHeaderState extends ConsumerState<AppHeader> {
   }
 
   void _submit() {
+    final selectedColor = ref.read(selectedTaskColorProvider);
+    print('Couleur sélectionnée : $selectedColor'); 
     if (_formKey.currentState!.validate()) {
+
       if (_endTime.hour < _startTime.hour ||
           (_endTime.hour == _startTime.hour &&
               _endTime.minute <= _startTime.minute)) {
@@ -66,8 +70,10 @@ class _AppHeaderState extends ConsumerState<AppHeader> {
         days: _selectedDays,
         startTime: _startTime,
         endTime: _endTime,
-        color: ref.read(selectedTaskColorProvider),
+        color: taskColors[selectedColor],
       );
+
+      print('Tâche créée avec la couleur : ${task.color}');
 
       ref.read(taskNotifierProvider.notifier).addTask(task);
       Navigator.pop(context);
@@ -373,32 +379,20 @@ class _AppHeaderState extends ConsumerState<AppHeader> {
                       onChanged: (value) =>
                           setState(() => _description = value),
                     ),
-                    ColorPicker(
-                      color: ref.watch(selectedTaskColorProvider),
-                      onColorChanged: (Color color) {
-                        ref
-                            .read(selectedTaskColorProvider.notifier)
-                            .selectedColor(color);
-                      },
-                      width: 40,
-                      height: 40,
-                      spacing: 8,
-                      runSpacing: 8,
-                      borderRadius: 20,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                      ),
-                      pickersEnabled: const <ColorPickerType, bool>{
-                        ColorPickerType.primary: false,
-                        ColorPickerType.accent: false,
-                        ColorPickerType.wheel: false,
-                        ColorPickerType.both: false,
-                        ColorPickerType.custom: true,
-                      },
-                      customColorSwatchesAndNames: ref
-                          .read(selectedTaskColorProvider.notifier)
-                          .getCustomColors(),
-                    ),
+                    
+                    Consumer(
+                    builder: (context, ref, child) {
+                      final selectedColorIndex = ref.watch(selectedTaskColorProvider);
+                      return CustomColorPicker(
+                        selectedColorIndex: selectedColorIndex,
+                        onColorSelected: (Color color) {
+                          // Vous pouvez utiliser cette couleur si nécessaire
+                          print('Couleur sélectionnée : $color');
+                        },
+                      );
+                    },
+                  ),
+             
                     DaySelector(
                       selectedDays: _selectedDays,
                       onChanged: (days) => setDialogState(
