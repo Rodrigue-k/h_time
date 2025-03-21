@@ -30,9 +30,9 @@ class CustomColorPicker extends ConsumerWidget {
         final color = taskColors[index];
         return GestureDetector(
           onTap: () {
-            onColorSelected(color); // Appeler le callback avec la couleur sélectionnée
-            ref.read(selectedTaskColorProvider.notifier).selectColor(index); // Mettre à jour l'index dans le provider
-            print("Clique sur couleur : $color"); // Log de la couleur sélectionnée
+            onColorSelected(color);
+            ref.read(selectedTaskColorProvider.notifier).selectColor(index);
+            //print("Clique sur couleur : $color"); 
           },
           child: Container(
             decoration: BoxDecoration(

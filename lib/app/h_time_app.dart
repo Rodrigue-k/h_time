@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:h_time/widgets/widgets.dart';
 
 import '../providers/providers.dart';
 import '../screens/screens.dart';

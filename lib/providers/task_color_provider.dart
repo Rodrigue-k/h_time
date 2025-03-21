@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../utils/color_constants.dart';
 
 part 'task_color_provider.g.dart';
 
@@ -12,7 +11,9 @@ class SelectedTaskColor extends _$SelectedTaskColor {
   }
 
   void selectColor(int index) {
-    print('Index de couleur mis à jour dans le provider : $index'); // Log de l'index mis à jour
+    if (kDebugMode) {
+      print('Index de couleur mis à jour dans le provider : $index');
+    } 
     state = index;
   }
 }

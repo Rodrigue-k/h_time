@@ -1,21 +1,35 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 import 'app/app.dart';
 import 'services/task_service.dart';
+import 'services/notification_service.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    
+    // Initialize notifications first
+    final notificationService = NotificationService();
+    await notificationService.init();
 
-  // Initialiser la base de données
-  final taskService = TaskService();
-  await taskService.init(); 
+    // Initialize window manager
+    await windowManager.ensureInitialized();
+    await windowManager.waitUntilReadyToShow();
+    windowManager.setMinimumSize(const Size(800, 600));
 
-  // Configuration de la fenêtre
-  await windowManager.ensureInitialized();
-  windowManager.setMinimumSize(const Size(800, 600));
+    // Initialize task service
+    final taskService = TaskService();
+    await taskService.init();
 
-  runApp(const ProviderScope(child: MyApp()));
+    runApp(const ProviderScope(child: MyApp()));
+  } catch (e) {
+    if (kDebugMode) {
+      print('Error during app initialization: $e');
+    }
+    rethrow;
+  }
 }
 
 class MyApp extends StatelessWidget {

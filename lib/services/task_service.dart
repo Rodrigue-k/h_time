@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:path/path.dart';
@@ -17,7 +18,9 @@ class TaskService {
   Future<void> init() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, 'tasks.db');
-    print('Chemin de la base de données : $path');
+    if (kDebugMode) {
+      print('Chemin de la base de données : $path');
+    }
     _db = sqlite3.open(path);
     _db.execute('''
       CREATE TABLE IF NOT EXISTS tasks(

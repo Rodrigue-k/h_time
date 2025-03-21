@@ -47,18 +47,22 @@ class _HomeScreenState extends State<HomeScreen> {
           print('Schedule captured and saved to: ${file.path}');
         }
 
-        // Optionnel : Afficher une notification de succès
+        if(mounted) {
+          // Optionnel : Afficher une notification de succès
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Capture sauvegardée')),
         );
+        }
       }
     } catch (e) {
       if (kDebugMode) {
         print('Error during capture: $e');
       }
-      ScaffoldMessenger.of(context).showSnackBar(
+      if(mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur lors de la capture')),
       );
+      }
     }
   }
 

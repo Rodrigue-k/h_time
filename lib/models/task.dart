@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
-class Task{
+class Task extends Equatable {
   final String id;
   final String title;
   final String description;
@@ -9,6 +9,8 @@ class Task{
   final TimeOfDay startTime;
   final TimeOfDay endTime;
   final Color color;
+  final bool notificationsEnabled;
+  final String? soundPath;
 
   Task({
     String? id,
@@ -18,6 +20,8 @@ class Task{
     required this.startTime,
     required this.endTime,
     required this.color,
+    this.notificationsEnabled = true,
+    this.soundPath,
   }) : id = id ?? DateTime.now().toString();
 
   // Copie avec modification
@@ -29,6 +33,8 @@ class Task{
     TimeOfDay? startTime,
     TimeOfDay? endTime,
     Color? color,
+    bool? notificationsEnabled,
+    String? soundPath,
   }) {
     return Task(
       id: id ?? this.id,
@@ -38,6 +44,8 @@ class Task{
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
       color: color ?? this.color,
+      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+      soundPath: soundPath ?? this.soundPath,
     );
   }
 
@@ -51,6 +59,8 @@ class Task{
       'startTime': {'hour': startTime.hour, 'minute': startTime.minute},
       'endTime': {'hour': endTime.hour, 'minute': endTime.minute},
       'color': color.value,
+      'notificationsEnabled': notificationsEnabled,
+      'soundPath': soundPath,
     };
   }
 
@@ -70,38 +80,27 @@ class Task{
         minute: (map['endTime'] as Map<String, dynamic>)['minute'] as int,
       ),
       color: Color(map['color'] as int),
+      notificationsEnabled: map['notificationsEnabled'] ?? true,
+      soundPath: map['soundPath'] as String?,
     );
   }
 
-  // Égalité
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Task &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          title == other.title &&
-          description == other.description &&
-          listEquals(days, other.days) &&
-          startTime == other.startTime &&
-          endTime == other.endTime &&
-          color == other.color;
-
-  @override
-  int get hashCode =>
-      id.hashCode ^
-      title.hashCode ^
-      description.hashCode ^
-      days.hashCode ^
-      startTime.hashCode ^
-      endTime.hashCode ^
-      color.hashCode;
-
-  get startHour => null;
-
   @override
   String toString() {
-    return 'Task{id: $id, title: $title, description: $description, days: $days, startTime: $startTime, endTime: $endTime, color: $color}';
+    return 'Task{id: $id, title: $title, description: $description, days: $days, startTime: $startTime, endTime: $endTime, color: $color, notificationsEnabled: $notificationsEnabled, soundPath: $soundPath}';
   }
+  
+  @override
+  List<Object?> get props => [
+        id,
+        title,
+        description,
+        days,
+        startTime,
+        endTime,
+        color,
+        notificationsEnabled,
+        soundPath,
+      ];
 }
 

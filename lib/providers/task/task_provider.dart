@@ -1,3 +1,4 @@
+import 'package:h_time/services/notification_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../models/task.dart';
 import '../../services/task_service.dart';
@@ -7,6 +8,7 @@ part 'task_provider.g.dart';
 @riverpod
 class TaskNotifier extends _$TaskNotifier {
   final _taskService = TaskService();
+  final notificationService = NotificationService();
 
   @override
   Future<List<Task>> build() async {
@@ -15,6 +17,7 @@ class TaskNotifier extends _$TaskNotifier {
 
   Future<void> addTask(Task task) async {
     _taskService.createTask(task);
+    await notificationService.scheduleTaskNotification(task);
     state = AsyncValue.data([...state.value ?? [], task]);
   }
 
@@ -26,6 +29,7 @@ class TaskNotifier extends _$TaskNotifier {
 
   Future<void> updateTask(Task task) async {
     _taskService.updateTask(task);
+    await notificationService.scheduleTaskNotification(task);
     state = AsyncValue.data(
         (state.value ?? []).map((t) => t.id == task.id ? task : t).toList());
   }

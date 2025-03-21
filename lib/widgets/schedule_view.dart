@@ -50,12 +50,12 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
     //final dayBoxWidth = (width - 215) / 7;
     final dayBoxWidth = (width - 215 + 150) / 7;
     final today = DateTime.now().weekday - 1;
-    final tasks = ref.watch(taskNotifierProvider);
+    ref.watch(taskNotifierProvider);
 
     return Container(
       color: Colors.white,
       child: SingleChildScrollView(
-        child: Container(
+        child: SizedBox(
           width: MediaQuery.of(context).size.width, // Largeur finie
           height: 24 * widget.hourHeight,
           child: Stack(
@@ -277,8 +277,8 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
               child: GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Container(
-                    color: Colors.black.withOpacity(
-                        0.6)), // Fond plus sombre pour un meilleur contraste
+                    color: Colors.black.withValues(
+                        alpha: .6)), // Fond plus sombre pour un meilleur contraste
               ),
             ),
             // Positionnement du popup
@@ -300,7 +300,7 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black
-                              .withOpacity(0.15), // Ombre plus douce
+                              .withValues(alpha :0.15), // Ombre plus douce
                           blurRadius: 12,
                           spreadRadius: 2,
                           offset: const Offset(0, 4),
@@ -378,14 +378,14 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
                                 ),
                               ),
                               backgroundColor: task.days[index]
-                                  ? task.color.withOpacity(0.2)
+                                  ? task.color.withValues(alpha :0.2)
                                   : Colors.grey.shade100,
                               shape: RoundedRectangleBorder(
                                 borderRadius:
                                     BorderRadius.circular(12), // Chips arrondis
                                 side: BorderSide(
                                   color: task.days[index]
-                                      ? task.color.withOpacity(0.5)
+                                      ? task.color.withValues(alpha :0.5)
                                       : Colors.grey.shade300,
                                 ),
                               ),
@@ -852,7 +852,7 @@ class CurrentTimePainter extends CustomPainter {
         fontSize: 11,
         color: Colors.red,
         fontWeight: FontWeight.w500,
-        backgroundColor: Colors.white.withOpacity(0.8),
+        backgroundColor: Colors.white.withValues(alpha :0.8),
       ),
     );
 
@@ -865,7 +865,7 @@ class CurrentTimePainter extends CustomPainter {
 
     // Dessin du fond blanc pour l'heure
     final textBackgroundPaint = Paint()
-      ..color = Colors.white.withOpacity(0.9)
+      ..color = Colors.white.withValues(alpha :0.9)
       ..style = PaintingStyle.fill;
 
     final textBackgroundRect = RRect.fromRectAndRadius(

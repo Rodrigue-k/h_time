@@ -1,4 +1,5 @@
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -38,7 +39,9 @@ class _AppHeaderState extends ConsumerState<AppHeader> {
 
   void _submit() {
     final selectedColor = ref.read(selectedTaskColorProvider);
-    print('Couleur sélectionnée : $selectedColor'); 
+    if (kDebugMode) {
+      print('Couleur sélectionnée : $selectedColor');
+    } 
     if (_formKey.currentState!.validate()) {
 
       if (_endTime.hour < _startTime.hour ||
@@ -73,7 +76,7 @@ class _AppHeaderState extends ConsumerState<AppHeader> {
         color: taskColors[selectedColor],
       );
 
-      print('Tâche créée avec la couleur : ${task.color}');
+      //print('Tâche créée avec la couleur : ${task.color}');
 
       ref.read(taskNotifierProvider.notifier).addTask(task);
       Navigator.pop(context);
@@ -201,7 +204,7 @@ class _AppHeaderState extends ConsumerState<AppHeader> {
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
                               ),
-                            ), //TODO: Add Text Style
+                            ),
                           ),
                         ),
                       ),
@@ -231,7 +234,7 @@ class _AppHeaderState extends ConsumerState<AppHeader> {
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
                               ),
-                            ), //TODO: Add Text Style
+                            ), 
                           ),
                         ),
                       ),
@@ -387,7 +390,9 @@ class _AppHeaderState extends ConsumerState<AppHeader> {
                         selectedColorIndex: selectedColorIndex,
                         onColorSelected: (Color color) {
                           // Vous pouvez utiliser cette couleur si nécessaire
-                          print('Couleur sélectionnée : $color');
+                          if (kDebugMode) {
+                            print('Couleur sélectionnée : $color');
+                          }
                         },
                       );
                     },

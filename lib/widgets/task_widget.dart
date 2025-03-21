@@ -15,7 +15,7 @@ class TaskWidget extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: task.color.withOpacity(0.3),
+          color: task.color.withValues(alpha: .3),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: task.color, width: 2),
         ),
