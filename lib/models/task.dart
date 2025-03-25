@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class Task extends Equatable {
   final String id;
@@ -9,8 +11,6 @@ class Task extends Equatable {
   final TimeOfDay startTime;
   final TimeOfDay endTime;
   final Color color;
-  final bool notificationsEnabled;
-  final String? soundPath;
 
   Task({
     String? id,
@@ -20,8 +20,6 @@ class Task extends Equatable {
     required this.startTime,
     required this.endTime,
     required this.color,
-    this.notificationsEnabled = true,
-    this.soundPath,
   }) : id = id ?? DateTime.now().toString();
 
   // Copie avec modification
@@ -33,8 +31,6 @@ class Task extends Equatable {
     TimeOfDay? startTime,
     TimeOfDay? endTime,
     Color? color,
-    bool? notificationsEnabled,
-    String? soundPath,
   }) {
     return Task(
       id: id ?? this.id,
@@ -44,8 +40,6 @@ class Task extends Equatable {
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
       color: color ?? this.color,
-      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
-      soundPath: soundPath ?? this.soundPath,
     );
   }
 
@@ -59,8 +53,6 @@ class Task extends Equatable {
       'startTime': {'hour': startTime.hour, 'minute': startTime.minute},
       'endTime': {'hour': endTime.hour, 'minute': endTime.minute},
       'color': color.value,
-      'notificationsEnabled': notificationsEnabled,
-      'soundPath': soundPath,
     };
   }
 
@@ -80,14 +72,12 @@ class Task extends Equatable {
         minute: (map['endTime'] as Map<String, dynamic>)['minute'] as int,
       ),
       color: Color(map['color'] as int),
-      notificationsEnabled: map['notificationsEnabled'] ?? true,
-      soundPath: map['soundPath'] as String?,
     );
   }
 
   @override
   String toString() {
-    return 'Task{id: $id, title: $title, description: $description, days: $days, startTime: $startTime, endTime: $endTime, color: $color, notificationsEnabled: $notificationsEnabled, soundPath: $soundPath}';
+    return 'Task{id: $id, title: $title, description: $description, days: $days, startTime: $startTime, endTime: $endTime, color: $color}';
   }
   
   @override
@@ -99,8 +89,67 @@ class Task extends Equatable {
         startTime,
         endTime,
         color,
-        notificationsEnabled,
-        soundPath,
       ];
+
+  Future<void> scheduleNotifications(BuildContext context) async {
+    final now = DateTime.now();
+    final startDateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      startTime.hour,
+      startTime.minute,
+    );
+
+    for (int i = 0; i < days.length; i++) {
+      if (days[i]) {
+        final notificationTime = _getNextOccurrence(startDateTime, i);
+        if (notificationTime.isAfter(now)) {
+          await _scheduleSingleNotification(context, notificationTime, i);
+        }
+      }
+    }
+  }
+
+  DateTime _getNextOccurrence(DateTime baseTime, int weekday) {
+    final occurrence = baseTime.add(Duration(days: (weekday - baseTime.weekday + 7) % 7));
+    return occurrence.isBefore(DateTime.now()) 
+        ? occurrence.add(const Duration(days: 7))
+        : occurrence;
+  }
+
+  Future<void> _scheduleSingleNotification(
+    BuildContext context,
+    DateTime scheduledTime,
+    int dayIndex,
+  ) async {
+    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      id.hashCode + dayIndex, // ID unique
+      'Rappel: $title',
+      'Commence à ${startTime.format(context)}',
+      tz.TZDateTime.from(scheduledTime, tz.local),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'task_channel',
+          'Rappels de tâches',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+      ),
+      androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation: 
+          UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+  }
+
+  Future<void> cancelNotifications() async {
+    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    for (int i = 0; i < days.length; i++) {
+      await flutterLocalNotificationsPlugin.cancel(id.hashCode + i);
+    }
+  }
 }
 

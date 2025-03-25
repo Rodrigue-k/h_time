@@ -1,19 +1,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:h_time/services/notification_service.dart';
 import 'package:window_manager/window_manager.dart';
 import 'app/app.dart';
 import 'services/task_service.dart';
-import 'services/notification_service.dart';
 
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
-    
-    // Initialize notifications first
-    final notificationService = NotificationService();
-    await notificationService.init();
 
+    await NotificationService.initialize();
+    
     // Initialize window manager
     await windowManager.ensureInitialized();
     await windowManager.waitUntilReadyToShow();
