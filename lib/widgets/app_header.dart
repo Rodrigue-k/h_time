@@ -78,7 +78,7 @@ class _AppHeaderState extends ConsumerState<AppHeader> {
 
       //print('Tâche créée avec la couleur : ${task.color}');
 
-      ref.read(taskNotifierProvider.notifier).addTask(task, context);
+      ref.read(taskNotifierProvider.notifier).addTask(task);
       Navigator.pop(context);
     }
   }

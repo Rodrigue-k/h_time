@@ -1,25 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:h_time/services/notification_service.dart';
+import 'package:h_time/providers/providers.dart';
 import 'package:window_manager/window_manager.dart';
 import 'app/app.dart';
-import 'services/task_service.dart';
 
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
 
-    await NotificationService.initialize();
-    
     // Initialize window manager
     await windowManager.ensureInitialized();
     await windowManager.waitUntilReadyToShow();
     windowManager.setMinimumSize(const Size(800, 600));
-
-    // Initialize task service
-    final taskService = TaskService();
-    await taskService.init();
 
     runApp(const ProviderScope(child: MyApp()));
   } catch (e) {
@@ -30,12 +23,26 @@ void main() async {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notificationAsync = ref.watch(notificationServiceProvider);
+    final  taskAsync = ref.watch(taskServiceProvider);
+
+    return notificationAsync.when(
+      data: (notificationService) => 
+      taskAsync.when(
+        data: (taskService){
+          if (kDebugMode) {
+            notificationService.showNotification(
+              id: 0,
+              title: 'Test Notification',
+              body: 'Ceci est une notification sur Windows !',
+            );
+          }
+          return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'H-Time',
       theme: ThemeData(
@@ -45,5 +52,23 @@ class MyApp extends StatelessWidget {
       ),
       home: const HTimeApp(),
     );
+        }, error: (error, stack) =>
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: Text('Error: $error'),
+            ),
+          ),
+        ), loading: () => MaterialApp(home: Scaffold(
+          body: Center(child: CircularProgressIndicator(),),
+        ),)), error: (error , stack) => MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: Text('Error: $error'),
+            ),
+          ),
+        ), loading: () => MaterialApp(home: Scaffold(
+          body: Center(child: CircularProgressIndicator(),),
+        ),));
   }
 }

@@ -615,7 +615,7 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
                   days: selectedDays,
                 );
 
-                ref.read(taskNotifierProvider.notifier).updateTask(updatedTask, context);
+                ref.read(taskNotifierProvider.notifier).updateTask(updatedTask);
                 Navigator.pop(context);
               },
               child: Text('Enregistrer'),
