@@ -1,2 +1,2 @@
 # h_time
- Logiciel pour creer un empllois du temps hebdomadaire
+ Logiciel pour creer un emplois du temps hebdomadaire
